@@ -1,45 +1,31 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
+import { ThemeProvider } from 'styled-components';
+import theme from './utils/theme';
+import GlobalStyles from './utils/globalStyles';
+import Layout from './components/layout/Layout';
 
-// Şimdilik geçici sayfalar oluşturuyoruz, ileride ayrı dosyalara taşınacak
-const Home = () => (
-  <div className="page">
-    <h1>TeeVogue</h1>
-    <p>Özel tasarım t-shirtler için doğru adres</p>
-  </div>
-);
-
-const Products = () => (
-  <div className="page">
-    <h1>Ürünlerimiz</h1>
-    <p>Ürün listemiz yakında burada olacak</p>
-  </div>
-);
+// Sayfalar
+import Home from './pages/Home';
+import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-          <nav>
-            <ul>
-              <li><a href="/">Ana Sayfa</a></li>
-              <li><a href="/products">Ürünler</a></li>
-            </ul>
-          </nav>
-        </header>
-        <main>
+    <ThemeProvider theme={theme}>
+      <GlobalStyles />
+      <Router>
+        <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/category/:categoryId" element={<Products />} />
+            <Route path="*" element={<div>Sayfa Bulunamadı</div>} />
           </Routes>
-        </main>
-        <footer>
-          <p>&copy; 2025 TeeVogue - Tüm Hakları Saklıdır</p>
-        </footer>
-      </div>
-    </Router>
+        </Layout>
+      </Router>
+    </ThemeProvider>
   );
 }
 
