@@ -1,70 +1,68 @@
-# Getting Started with Create React App
+# TeeVogue - T-Shirt Satış Platformu
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+TeeVogue, modern ve kullanıcı dostu bir t-shirt satış platformudur. Özel tasarımlar ve kaliteli ürünlerle müşterilere benzersiz bir alışveriş deneyimi sunmayı hedefler.
 
-## Available Scripts
+## Proje Kurulumu
 
-In the project directory, you can run:
+Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin:
 
-### `npm start`
+```bash
+# Repoyu klonlayın
+git clone <repo-url>
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# Proje dizinine gidin
+cd teevogue
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+# Bağımlılıkları yükleyin
+npm install
 
-### `npm test`
+# Geliştirme sunucusunu başlatın
+npm start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresini açarak uygulamayı görüntüleyebilirsiniz.
 
-### `npm run build`
+## Kullanılan Teknolojiler
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- React.js
+- React Router
+- Styled Components
+- Axios
+- React Icons
+- React Hook Form
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Proje Yapısı
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+src/
+├── assets/         # Resimler, fontlar ve diğer statik dosyalar
+├── components/     # Yeniden kullanılabilir bileşenler
+│   ├── common/     # Butonlar, formlar gibi genel bileşenler
+│   ├── layout/     # Header, footer gibi düzen bileşenleri
+│   └── product/    # Ürünle ilgili bileşenler
+├── contexts/       # React context'leri
+├── hooks/          # Özel React hook'ları
+├── pages/          # Sayfa bileşenleri
+├── services/       # API istekleri ve diğer servisler
+└── utils/          # Yardımcı fonksiyonlar ve sabitler
+```
 
-### `npm run eject`
+## Özellikler
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Ürün listeleme ve filtreleme
+- Ürün detay sayfaları
+- Sepet işlevselliği
+- Kullanıcı hesap yönetimi
+- Ödeme entegrasyonu
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Katkıda Bulunma
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Repoyu fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull request açın
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Lisans
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Bu proje MIT lisansı altında lisanslanmıştır. Daha fazla bilgi için `LICENSE` dosyasına bakın.
