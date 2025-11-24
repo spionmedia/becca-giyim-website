@@ -214,16 +214,16 @@ const Footer = () => {
                 <FooterLink to="/faq">Sıkça Sorulan Sorular</FooterLink>
               </FooterListItem>
               <FooterListItem>
-                <FooterLink to="/shipping">Kargo ve Teslimat</FooterLink>
+                <FooterLink to="/teslimat-ve-iade">Teslimat ve İade</FooterLink>
               </FooterListItem>
               <FooterListItem>
-                <FooterLink to="/returns">İade ve Değişim</FooterLink>
+                <FooterLink to="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</FooterLink>
               </FooterListItem>
               <FooterListItem>
                 <FooterLink to="/size-guide">Beden Rehberi</FooterLink>
               </FooterListItem>
               <FooterListItem>
-                <FooterLink to="/privacy-policy">Gizlilik Politikası</FooterLink>
+                <FooterLink to="/gizlilik-politikasi">Gizlilik Politikası</FooterLink>
               </FooterListItem>
             </FooterList>
           </FooterSection>

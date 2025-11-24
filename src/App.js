@@ -14,6 +14,9 @@ import CategoryLanding from './pages/CategoryLanding';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductCreate from './pages/ProductCreate';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import DeliveryReturns from './pages/DeliveryReturns';
+import DistanceSalesAgreement from './pages/DistanceSalesAgreement';
 
 function App() {
   return (
@@ -28,6 +31,9 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/gizlilik-politikasi" element={<PrivacyPolicy />} />
+              <Route path="/teslimat-ve-iade" element={<DeliveryReturns />} />
+              <Route path="/mesafeli-satis-sozlesmesi" element={<DistanceSalesAgreement />} />
               <Route path="/:gender" element={<CategoryLanding />} />
               <Route path="/:gender/:subcategory" element={<Products />} />
               <Route path="/admin/urun-ekle" element={<ProductCreate />} />
