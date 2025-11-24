@@ -3,7 +3,6 @@ import { Navigate, Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../components/common/Button';
 import categoryMeta from '../constants/categoryMeta';
-import ProductCard from '../components/product/ProductCard';
 import useProducts from '../hooks/useProducts';
 
 const Page = styled.section`
@@ -145,8 +144,6 @@ const CategoryLanding = () => {
   if (!meta) {
     return <Navigate to="/" replace />;
   }
-
-  const featuredProducts = allProducts.slice(0, 4);
 
   return (
     <Page>
