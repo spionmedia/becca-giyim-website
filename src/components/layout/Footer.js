@@ -160,7 +160,7 @@ const Footer = () => {
     e.preventDefault();
     // Newsletter form işleme
   };
-  
+
   return (
     <FooterContainer>
       <FooterContent>
@@ -185,7 +185,7 @@ const Footer = () => {
               </SocialIcon>
             </SocialIcons>
           </FooterSection>
-          
+
           <FooterSection>
             <FooterTitle>Hızlı Linkler</FooterTitle>
             <FooterList>
@@ -195,24 +195,12 @@ const Footer = () => {
               <FooterListItem>
                 <FooterLink to="/products">Ürünler</FooterLink>
               </FooterListItem>
-              <FooterListItem>
-                <FooterLink to="/categories">Kategoriler</FooterLink>
-              </FooterListItem>
-              <FooterListItem>
-                <FooterLink to="/about">Hakkımızda</FooterLink>
-              </FooterListItem>
-              <FooterListItem>
-                <FooterLink to="/contact">İletişim</FooterLink>
-              </FooterListItem>
             </FooterList>
           </FooterSection>
-          
+
           <FooterSection>
             <FooterTitle>Yardım</FooterTitle>
             <FooterList>
-              <FooterListItem>
-                <FooterLink to="/faq">Sıkça Sorulan Sorular</FooterLink>
-              </FooterListItem>
               <FooterListItem>
                 <FooterLink to="/teslimat-ve-iade">Teslimat ve İade</FooterLink>
               </FooterListItem>
@@ -220,14 +208,11 @@ const Footer = () => {
                 <FooterLink to="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</FooterLink>
               </FooterListItem>
               <FooterListItem>
-                <FooterLink to="/size-guide">Beden Rehberi</FooterLink>
-              </FooterListItem>
-              <FooterListItem>
                 <FooterLink to="/gizlilik-politikasi">Gizlilik Politikası</FooterLink>
               </FooterListItem>
             </FooterList>
           </FooterSection>
-          
+
           <FooterSection>
             <FooterTitle>Bülten</FooterTitle>
             <p style={{ color: 'rgba(255, 255, 255, 0.85)', marginBottom: '1rem' }}>
@@ -235,19 +220,19 @@ const Footer = () => {
             </p>
             <Newsletter>
               <NewsletterForm onSubmit={handleNewsletterSubmit}>
-                <NewsletterInput 
-                  type="email" 
-                  placeholder="E-posta adresiniz" 
-                  required 
+                <NewsletterInput
+                  type="email"
+                  placeholder="E-posta adresiniz"
+                  required
                 />
                 <NewsletterButton type="submit">Abone Ol</NewsletterButton>
               </NewsletterForm>
             </Newsletter>
           </FooterSection>
         </FooterGrid>
-        
+
         <Divider />
-        
+
         <BottomFooter>
           <Copyright>
             &copy; {new Date().getFullYear()} Becca Giyim. Tüm hakları saklıdır.

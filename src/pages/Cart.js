@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Page = styled.section`
   display: grid;
@@ -104,7 +105,7 @@ const PriceBlock = styled.div`
 
 const Price = styled.span`
   font-weight: ${props => props.theme.typography.fontWeight.bold};
-`; 
+`;
 
 const RemoveButton = styled.button`
   background: none;
@@ -147,19 +148,30 @@ const EmptyState = styled.div`
 
 const Cart = () => {
   const { items, summary, updateQuantity, removeItem, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleDecrease = (item) => {
     if (item.quantity > 1) {
-      updateQuantity(item.id, item.quantity - 1, { size: item.size, color: item.color });
+      updateQuantity(item.id, item.quantity - 1);
     }
   };
 
   const handleIncrease = (item) => {
-    updateQuantity(item.id, item.quantity + 1, { size: item.size, color: item.color });
+    updateQuantity(item.id, item.quantity + 1);
   };
 
   const handleRemove = (item) => {
-    removeItem(item.id, { size: item.size, color: item.color });
+    removeItem(item.id);
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      alert('Sipariş vermek için lütfen giriş yapınız.');
+      navigate('/login');
+      return;
+    }
+    navigate('/checkout');
   };
 
   if (!items.length) {
@@ -212,7 +224,13 @@ const Cart = () => {
             <span>Genel Toplam</span>
             <span>{summary.subtotal.toLocaleString('tr-TR')} ₺</span>
           </SummaryTotal>
-          <Button variant="primary" size="large" fullWidth style={{ marginTop: '1rem' }}>
+          <Button
+            variant="primary"
+            size="large"
+            fullWidth
+            style={{ marginTop: '1rem' }}
+            onClick={handleCheckout}
+          >
             Ödemeye Geç
           </Button>
           <Button variant="text" fullWidth onClick={clearCart} style={{ marginTop: '0.5rem' }}>

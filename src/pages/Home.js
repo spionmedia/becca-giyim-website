@@ -373,7 +373,7 @@ const Home = () => {
     e.preventDefault();
     alert('Bülten aboneliğiniz alındı!');
   };
-  
+
   return (
     <>
       {/* Hero Section */}
@@ -383,10 +383,10 @@ const Home = () => {
           <HeroSubtitle>
             Becca Giyim ile şıklığı yeniden keşfet. Kaliteli kumaşlar ve modern tasarımlarla gardırobunuzu güncelleyin.
           </HeroSubtitle>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             size="large"
-            as={Link} 
+            as={Link}
             to="/products"
             rightIcon={<FiArrowRight />}
           >
@@ -394,13 +394,13 @@ const Home = () => {
           </Button>
         </HeroContent>
         <HeroImage>
-          <img 
-            src="https://images.unsplash.com/photo-1562157873-818bc0726f68?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-            alt="Becca Giyim Koleksiyonu" 
+          <img
+            src="https://images.unsplash.com/photo-1562157873-818bc0726f68?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+            alt="Becca Giyim Koleksiyonu"
           />
         </HeroImage>
       </HeroSection>
-      
+
       {/* Featured Products Section */}
       <section>
         <SectionHeader>
@@ -421,7 +421,7 @@ const Home = () => {
           )}
         </ProductGrid>
       </section>
-      
+
       {/* Categories Section */}
       <CategorySection>
         <SectionTitle>Kategoriler</SectionTitle>
@@ -438,7 +438,7 @@ const Home = () => {
           ))}
         </CategoryGrid>
       </CategorySection>
-      
+
       {/* About Section */}
       <AboutSection>
         <AboutContent>
@@ -449,17 +449,11 @@ const Home = () => {
           <p>
             Tüm ürünlerimiz seçkin kumaşlardan üretilmekte ve sürdürülebilir üretim ilkelerine uyulmaktadır. Kalite ve tarz, değerlerimizin merkezinde yer alır.
           </p>
-          <Button 
-            variant="outline" 
-            as={Link} 
-            to="/about"
-          >
-            Daha Fazla Bilgi
-          </Button>
+
         </AboutContent>
         <AboutImage />
       </AboutSection>
-      
+
       {/* Testimonials Section */}
       <TestimonialSection>
         <SectionTitle>Müşteri Yorumları</SectionTitle>
@@ -478,16 +472,16 @@ const Home = () => {
           ))}
         </TestimonialGrid>
       </TestimonialSection>
-      
+
       {/* Newsletter Section */}
       <NewsletterSection>
         <SectionTitle>Bültenimize Abone Olun</SectionTitle>
         <p>Yeni ürünler, kampanyalar ve indirimlerden ilk siz haberdar olun.</p>
         <NewsletterForm onSubmit={handleNewsletterSubmit}>
-          <NewsletterInput 
-            type="email" 
-            placeholder="E-posta adresiniz" 
-            required 
+          <NewsletterInput
+            type="email"
+            placeholder="E-posta adresiniz"
+            required
           />
           <NewsletterButton type="submit">Abone Ol</NewsletterButton>
         </NewsletterForm>

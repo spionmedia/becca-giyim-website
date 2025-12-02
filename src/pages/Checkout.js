@@ -1,539 +1,395 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import Input from '../components/common/Input';
-import Button from '../components/common/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { processPayment3D } from '../services/paymentService';
 
-const Wrapper = styled.section`
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  display: flex;
+  gap: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const Section = styled.div`
+  flex: 1;
+`;
+
+const Title = styled.h2`
+  margin-bottom: 20px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
+
+const Input = styled.input`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+`;
+
+const InputGroup = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: ${props => props.theme.spacing.xl};
-  align-items: start;
-
-  @media (max-width: ${props => props.theme.breakpoints.tablet}) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 `;
 
-const Title = styled.h1`
-  margin-bottom: ${props => props.theme.spacing.xs};
-`;
-
-const Subtitle = styled.p`
-  margin-bottom: ${props => props.theme.spacing.xl};
-  color: ${props => props.theme.colors.text.secondary};
-`;
-
-const FormCard = styled.form`
-  background: ${props => props.theme.colors.surface};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: ${props => props.theme.spacing.xl};
-  box-shadow: ${props => props.theme.shadows.sm};
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.xl};
-`;
-
-const Section = styled.div``;
-
-const SectionTitle = styled.h3`
-  margin-bottom: ${props => props.theme.spacing.md};
-  font-size: ${props => props.theme.typography.fontSize.lg};
-`;
-
-const FieldRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: ${props => props.theme.spacing.md};
-
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.error ? props.theme.colors.error : props.theme.colors.text.disabled};
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-family: ${props => props.theme.typography.fontFamily.body};
-  font-size: ${props => props.theme.typography.fontSize.md};
-  resize: vertical;
-  background: ${props => props.theme.colors.background};
-`;
-
-const RadioGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.sm};
-`;
-
-const RadioOption = styled.label`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.theme.colors.text.disabled};
-  border-radius: ${props => props.theme.borderRadius.md};
-  cursor: pointer;
-  background: ${props => props.active ? props.theme.colors.background : props.theme.colors.surface};
-  transition: border 0.2s ease;
-
-  input {
-    margin-right: ${props => props.theme.spacing.md};
-  }
-`;
-
-const OptionInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`;
-
-const Helper = styled.span`
-  font-size: ${props => props.theme.typography.fontSize.sm};
-  color: ${props => props.theme.colors.text.secondary};
-`;
-
-const CheckboxWrapper = styled.label`
-  display: flex;
-  align-items: flex-start;
-  gap: ${props => props.theme.spacing.sm};
-  font-size: ${props => props.theme.typography.fontSize.sm};
-  color: ${props => props.theme.colors.text.secondary};
-`;
-
-const SummaryCard = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: ${props => props.theme.spacing.lg};
-  box-shadow: ${props => props.theme.shadows.sm};
-  position: sticky;
-  top: ${props => props.theme.spacing.xl};
+const OrderSummary = styled.div`
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  height: fit-content;
+  flex: 0 0 350px;
 `;
 
 const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: ${props => props.theme.spacing.sm};
-  color: ${props => props.theme.colors.text.secondary};
+  margin-bottom: 10px;
+  font-size: ${props => props.total ? '18px' : '14px'};
+  font-weight: ${props => props.total ? 'bold' : 'normal'};
+  padding-top: ${props => props.total ? '10px' : '0'};
+  border-top: ${props => props.total ? '1px solid #ddd' : 'none'};
 `;
 
-const SummaryTotal = styled(SummaryRow)`
-  font-size: ${props => props.theme.typography.fontSize.lg};
-  color: ${props => props.theme.colors.text.primary};
-  font-weight: ${props => props.theme.typography.fontWeight.bold};
-`;
-
-const Divider = styled.hr`
+const Button = styled.button`
+  width: 100%;
+  padding: 15px;
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
   border: none;
-  border-top: 1px solid ${props => props.theme.colors.muted};
-  margin: ${props => props.theme.spacing.md} 0;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
 `;
 
-const SuccessState = styled.div`
-  background: ${props => props.theme.colors.success}22;
-  border: 1px solid ${props => props.theme.colors.success};
-  padding: ${props => props.theme.spacing.lg};
-  border-radius: ${props => props.theme.borderRadius.md};
-  color: ${props => props.theme.colors.success};
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 `;
 
-const EmptyState = styled.div`
-  background: ${props => props.theme.colors.surface};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: ${props => props.theme.spacing.xl};
-  text-align: center;
-  box-shadow: ${props => props.theme.shadows.sm};
+const IframeContainer = styled.div`
+  background: white;
+  width: 90%;
+  max-width: 800px;
+  height: 80vh;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
 `;
 
-const initialForm = {
-  fullName: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
-  district: '',
-  postalCode: '',
-  notes: '',
-  delivery: 'standard',
-  paymentMethod: 'card',
-  cardName: '',
-  cardNumber: '',
-  cardExpiry: '',
-  cardCvc: '',
-  saveInfo: true,
-  acceptTerms: false,
-};
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10000;
+`;
 
 const Checkout = () => {
-  const { items, summary, clearCart } = useCart();
-  const [form, setForm] = useState(initialForm);
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
+  const { items: cart, summary, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [show3DSecure, setShow3DSecure] = useState(false);
+  const [iframeHtml, setIframeHtml] = useState('');
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
-  const shippingCost = form.delivery === 'express' ? 49.9 : 0;
-  const total = useMemo(() => summary.subtotal + shippingCost, [summary.subtotal, shippingCost]);
+  const [address, setAddress] = useState({
+    title: '',
+    full_name: '',
+    phone: '',
+    address_line: '',
+    city: '',
+    district: '',
+    zip_code: ''
+  });
 
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const [payment, setPayment] = useState({
+    cardHolder: '',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
+  });
+
+  const handleAddressChange = (e) => {
+    setAddress({ ...address, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!form.fullName.trim()) newErrors.fullName = 'Ad soyad zorunludur';
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = 'Geçerli bir e-posta girin';
-    if (!form.phone.trim()) newErrors.phone = 'Telefon zorunludur';
-    if (!form.address.trim()) newErrors.address = 'Adres zorunludur';
-    if (!form.city.trim()) newErrors.city = 'Şehir zorunludur';
-    if (!form.district.trim()) newErrors.district = 'İlçe zorunludur';
-    if (!form.postalCode.trim()) newErrors.postalCode = 'Posta kodu zorunludur';
-    if (form.paymentMethod === 'card') {
-      if (!form.cardName.trim()) newErrors.cardName = 'Kart üzerindeki isim zorunludur';
-      if (!form.cardNumber.trim() || form.cardNumber.replace(/\s/g, '').length < 15) newErrors.cardNumber = 'Kart numarasını kontrol edin';
-      if (!form.cardExpiry.trim()) newErrors.cardExpiry = 'Son kullanma tarihi zorunludur';
-      if (!form.cardCvc.trim() || form.cardCvc.length < 3) newErrors.cardCvc = 'CVC kodunu girin';
+  const handlePaymentChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'cardNumber') {
+      const rawValue = value.replace(/\D/g, '');
+      const truncatedValue = rawValue.slice(0, 16);
+      const formattedValue = truncatedValue.replace(/(\d{4})(?=\d)/g, '$1 ');
+      setPayment({ ...payment, [name]: formattedValue });
+    } else {
+      setPayment({ ...payment, [name]: value });
     }
-    if (!form.acceptTerms) newErrors.acceptTerms = 'Ön bilgilendirme ve mesafeli satış sözleşmesini kabul edin';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!validate()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert('Sipariş vermek için lütfen giriş yapınız.');
+      navigate('/login');
+      return;
+    }
 
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      setOrderSuccess(true);
-      clearCart();
-    }, 800);
+    setLoading(true);
+
+    try {
+      const cleanPayment = {
+        ...payment,
+        cardNumber: payment.cardNumber.replace(/\s/g, '')
+      };
+
+      // Adres ve telefon doğrulaması
+      if (!address.full_name || !address.phone || !address.address_line || !address.city) {
+        alert('Lütfen tüm teslimat bilgilerini doldurunuz.');
+        setLoading(false);
+        return;
+      }
+
+      // Sipariş datasını sakla
+      const orderData = {
+        user_id: user.id,
+        status: 'processing',
+        total_amount: summary.subtotal,
+        cart: cart,
+        shipping_address: address
+      };
+      setPendingOrderData(orderData);
+
+      // Callback URL
+      const callbackUrl = `${window.location.origin}/payment-callback`;
+
+      // 3D Secure'ü başlat - gerçek adres ve telefon bilgileriyle
+      const response = await processPayment3D(
+        cleanPayment,
+        user,
+        summary.subtotal,
+        callbackUrl,
+        address
+      );
+
+      if (response.status === 'success' && response.threeDSHtmlContent) {
+        // 3D Secure iframe göster
+        let htmlContent = response.threeDSHtmlContent;
+
+        // Base64 kontrolü: < ile başlamıyorsa muhtemelen Base64'tür
+        if (!htmlContent.trim().startsWith('<')) {
+          try {
+            const decoded = atob(htmlContent);
+            // Decode edilmiş veri HTML'e benziyor mu?
+            if (decoded.includes('<html') || decoded.includes('<!DOCTYPE')) {
+              htmlContent = decoded;
+            }
+          } catch (e) {
+            console.warn('Content is not Base64 or decode failed, using raw content');
+          }
+        }
+
+        setIframeHtml(htmlContent);
+        setShow3DSecure(true);
+
+        // conversationId'yi localStorage'a kaydet (callback için)
+        localStorage.setItem('pendingPayment', JSON.stringify({
+          conversationId: response.conversationId,
+          orderData: orderData
+        }));
+      } else {
+        alert('3D Secure başlatılamadı: ' + (response.errorMessage || 'Bilinmeyen hata'));
+      }
+    } catch (error) {
+      alert('İşlem başarısız: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!items.length && !orderSuccess) {
+  const close3DSecure = () => {
+    setShow3DSecure(false);
+    setIframeHtml('');
+    localStorage.removeItem('pendingPayment');
+  };
+
+  if (cart.length === 0) {
     return (
-      <EmptyState>
-        <h2>Sepetiniz boş</h2>
-        <p>Önce ürün ekledikten sonra ödeme adımını tamamlayabilirsiniz.</p>
-        <Button as={Link} to="/products" variant="primary" style={{ marginTop: '1rem' }}>
-          Ürünlere Göz At
-        </Button>
-      </EmptyState>
+      <Container>
+        <div style={{ textAlign: 'center', width: '100%' }}>
+          <h2>Sepetiniz boş</h2>
+          <Button onClick={() => navigate('/products')} style={{ maxWidth: '200px' }}>
+            Alışverişe Başla
+          </Button>
+        </div>
+      </Container>
     );
   }
 
   return (
-    <div>
-      <Title>Ödeme & Teslimat</Title>
-      <Subtitle>Bilgilerinizi doldurun, siparişinizi tamamlayın.</Subtitle>
-      <Wrapper>
+    <>
+      <Container>
         <div>
-          {orderSuccess ? (
-            <SuccessState>
-              <h3>Siparişiniz alındı!</h3>
-              <p>
-                Becca Giyim ekibi siparişinizi işleme aldı. Sipariş ve kargo detayları e-posta adresinize
-                iletilecek.
-              </p>
-              <Button as={Link} to="/" variant="primary" style={{ marginTop: '1rem' }}>
-                Ana Sayfaya Dön
-              </Button>
-            </SuccessState>
-          ) : (
-            <FormCard onSubmit={handleSubmit}>
-              <Section>
-                <SectionTitle>İletişim Bilgileri</SectionTitle>
-                <FieldRow>
-                  <Input
-                    label="Ad Soyad"
-                    name="fullName"
-                    fullWidth
-                    placeholder="Örn. Ayşe Yılmaz"
-                    value={form.fullName}
-                    onChange={handleChange}
-                    error={errors.fullName}
-                    helperText={errors.fullName}
-                    required
-                  />
-                  <Input
-                    label="E-posta"
-                    name="email"
-                    type="email"
-                    fullWidth
-                    placeholder="ornek@mail.com"
-                    value={form.email}
-                    onChange={handleChange}
-                    error={errors.email}
-                    helperText={errors.email}
-                    required
-                  />
-                </FieldRow>
+          <Section>
+            <Title>Teslimat Adresi</Title>
+            <Form>
+              <Input
+                name="title"
+                placeholder="Adres Başlığı (Ev, İş)"
+                value={address.title}
+                onChange={handleAddressChange}
+                required
+              />
+              <Input
+                name="full_name"
+                placeholder="Ad Soyad"
+                value={address.full_name}
+                onChange={handleAddressChange}
+                required
+              />
+              <Input
+                name="phone"
+                type="tel"
+                placeholder="Telefon Numarası"
+                value={address.phone}
+                onChange={handleAddressChange}
+                required
+              />
+              <Input
+                name="address_line"
+                placeholder="Adres"
+                value={address.address_line}
+                onChange={handleAddressChange}
+                required
+              />
+              <InputGroup>
                 <Input
-                  label="Telefon"
-                  name="phone"
-                  placeholder="5XX XXX XX XX"
-                  value={form.phone}
-                  onChange={handleChange}
-                  error={errors.phone}
-                  helperText={errors.phone}
+                  name="city"
+                  placeholder="İl"
+                  value={address.city}
+                  onChange={handleAddressChange}
                   required
                 />
-              </Section>
-
-              <Section>
-                <SectionTitle>Teslimat Adresi</SectionTitle>
                 <Input
-                  label="Adres"
-                  name="address"
-                  placeholder="Mahalle, cadde, bina, daire"
-                  value={form.address}
-                  onChange={handleChange}
-                  error={errors.address}
-                  helperText={errors.address}
+                  name="district"
+                  placeholder="İlçe"
+                  value={address.district}
+                  onChange={handleAddressChange}
                   required
                 />
-                <FieldRow>
-                  <Input
-                    label="Şehir"
-                    name="city"
-                    value={form.city}
-                    onChange={handleChange}
-                    error={errors.city}
-                    helperText={errors.city}
-                    required
-                    fullWidth
-                  />
-                  <Input
-                    label="İlçe"
-                    name="district"
-                    value={form.district}
-                    onChange={handleChange}
-                    error={errors.district}
-                    helperText={errors.district}
-                    required
-                    fullWidth
-                  />
-                </FieldRow>
-                <FieldRow>
-                  <Input
-                    label="Posta Kodu"
-                    name="postalCode"
-                    value={form.postalCode}
-                    onChange={handleChange}
-                    error={errors.postalCode}
-                    helperText={errors.postalCode}
-                    required
-                    fullWidth
-                  />
-                  <Input
-                    label="Adres Başlığı"
-                    name="addressTitle"
-                    placeholder="Ev, iş, vb."
-                    value={form.addressTitle || ''}
-                    onChange={handleChange}
-                    fullWidth
-                  />
-                </FieldRow>
-                <div>
-                  <label>Adres Notu</label>
-                  <TextArea
-                    name="notes"
-                    placeholder="Kurye için özel bir not paylaşmak ister misiniz?"
-                    value={form.notes}
-                    onChange={handleChange}
-                  />
-                </div>
-              </Section>
+              </InputGroup>
+              <Input
+                name="zip_code"
+                placeholder="Posta Kodu"
+                value={address.zip_code}
+                onChange={handleAddressChange}
+                required
+              />
+            </Form>
+          </Section>
 
-              <Section>
-                <SectionTitle>Teslimat Tercihi</SectionTitle>
-                <RadioGroup>
-                  <RadioOption active={form.delivery === 'standard'}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="radio"
-                        name="delivery"
-                        value="standard"
-                        checked={form.delivery === 'standard'}
-                        onChange={handleChange}
-                      />
-                      <OptionInfo>
-                        <strong>Standart Teslimat</strong>
-                        <Helper>2-4 iş günü • Ücretsiz</Helper>
-                      </OptionInfo>
-                    </div>
-                    <span>0 ₺</span>
-                  </RadioOption>
-                  <RadioOption active={form.delivery === 'express'}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="radio"
-                        name="delivery"
-                        value="express"
-                        checked={form.delivery === 'express'}
-                        onChange={handleChange}
-                      />
-                      <OptionInfo>
-                        <strong>Hızlı Teslimat</strong>
-                        <Helper>24 saat içinde kapında</Helper>
-                      </OptionInfo>
-                    </div>
-                    <span>49,90 ₺</span>
-                  </RadioOption>
-                </RadioGroup>
-              </Section>
-
-              <Section>
-                <SectionTitle>Ödeme Bilgileri</SectionTitle>
-                <RadioGroup>
-                  <RadioOption active={form.paymentMethod === 'card'}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="card"
-                        checked={form.paymentMethod === 'card'}
-                        onChange={handleChange}
-                      />
-                      <OptionInfo>
-                        <strong>Kredi/Banka Kartı</strong>
-                        <Helper>Visa, MasterCard, Troy</Helper>
-                      </OptionInfo>
-                    </div>
-                  </RadioOption>
-                  <RadioOption active={form.paymentMethod === 'cash'}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="cash"
-                        checked={form.paymentMethod === 'cash'}
-                        onChange={handleChange}
-                      />
-                      <OptionInfo>
-                        <strong>Kapıda Ödeme</strong>
-                        <Helper>Nakit veya POS</Helper>
-                      </OptionInfo>
-                    </div>
-                  </RadioOption>
-                </RadioGroup>
-
-                {form.paymentMethod === 'card' && (
-                  <>
-                    <Input
-                      label="Kart Üzerindeki İsim"
-                      name="cardName"
-                      value={form.cardName}
-                      onChange={handleChange}
-                      error={errors.cardName}
-                      helperText={errors.cardName}
-                      required
-                    />
-                    <Input
-                      label="Kart Numarası"
-                      name="cardNumber"
-                      placeholder="0000 0000 0000 0000"
-                      value={form.cardNumber}
-                      onChange={handleChange}
-                      error={errors.cardNumber}
-                      helperText={errors.cardNumber}
-                      required
-                    />
-                    <FieldRow>
-                      <Input
-                        label="Son Kullanma"
-                        name="cardExpiry"
-                        placeholder="AA/YY"
-                        value={form.cardExpiry}
-                        onChange={handleChange}
-                        error={errors.cardExpiry}
-                        helperText={errors.cardExpiry}
-                        required
-                        fullWidth
-                      />
-                      <Input
-                        label="CVC"
-                        name="cardCvc"
-                        placeholder="123"
-                        value={form.cardCvc}
-                        onChange={handleChange}
-                        error={errors.cardCvc}
-                        helperText={errors.cardCvc}
-                        required
-                        fullWidth
-                      />
-                    </FieldRow>
-                  </>
-                )}
-              </Section>
-
-              <Section>
-                <CheckboxWrapper>
-                  <input
-                    type="checkbox"
-                    name="saveInfo"
-                    checked={form.saveInfo}
-                    onChange={handleChange}
-                  />
-                  <span>Bilgilerimi sonraki alışverişlerimde otomatik doldur.</span>
-                </CheckboxWrapper>
-                <CheckboxWrapper>
-                  <input
-                    type="checkbox"
-                    name="acceptTerms"
-                    checked={form.acceptTerms}
-                    onChange={handleChange}
-                  />
-                  <span>
-                    Ön bilgilendirme formu ve mesafeli satış sözleşmesini okudum, kabul ediyorum.
-                    {errors.acceptTerms && (
-                      <Helper style={{ color: 'red', marginTop: 4 }}>{errors.acceptTerms}</Helper>
-                    )}
-                  </span>
-                </CheckboxWrapper>
-              </Section>
-
-              <Button type="submit" variant="primary" size="large" disabled={isSubmitting}>
-                {isSubmitting ? 'İşleniyor...' : 'Siparişi Tamamla'}
+          <Section>
+            <Title>Ödeme Bilgileri</Title>
+            <Form onSubmit={handleSubmit}>
+              <Input
+                name="cardHolder"
+                placeholder="Kart Üzerindeki İsim"
+                value={payment.cardHolder}
+                onChange={handlePaymentChange}
+                required
+              />
+              <Input
+                name="cardNumber"
+                placeholder="Kart Numarası"
+                value={payment.cardNumber}
+                onChange={handlePaymentChange}
+                maxLength="19"
+                required
+              />
+              <InputGroup>
+                <Input
+                  name="expiryDate"
+                  placeholder="AA/YY"
+                  value={payment.expiryDate}
+                  onChange={handlePaymentChange}
+                  maxLength="5"
+                  required
+                />
+                <Input
+                  name="cvv"
+                  placeholder="CVV"
+                  value={payment.cvv}
+                  onChange={handlePaymentChange}
+                  maxLength="3"
+                  required
+                />
+              </InputGroup>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'İşleniyor...' : 'Güvenli Ödeme Yap'}
               </Button>
-            </FormCard>
-          )}
+            </Form>
+          </Section>
         </div>
 
-        <SummaryCard>
-          <h3>Sipariş Özeti</h3>
-          <Divider />
-          <SummaryRow>
-            <span>Ara Toplam</span>
-            <span>{summary.subtotal.toLocaleString('tr-TR')} ₺</span>
+        <OrderSummary>
+          <Title>Sipariş Özeti</Title>
+          {cart.map((item, index) => (
+            <SummaryRow key={index}>
+              <span>{item.title} x{item.quantity}</span>
+              <span>{(item.price * item.quantity).toFixed(2)} TL</span>
+            </SummaryRow>
+          ))}
+          <SummaryRow total>
+            <span>Toplam</span>
+            <span>{summary.subtotal.toFixed(2)} TL</span>
           </SummaryRow>
-          <SummaryRow>
-            <span>Kargo</span>
-            <span>{shippingCost === 0 ? 'Ücretsiz' : `${shippingCost.toLocaleString('tr-TR')} ₺`}</span>
-          </SummaryRow>
-          <SummaryTotal>
-            <span>Genel Toplam</span>
-            <span>{total.toLocaleString('tr-TR')} ₺</span>
-          </SummaryTotal>
-          <Divider />
-          <Helper>
-            Bu aşamada ödeme simüle edilir. Gerçek API entegrasyonu eklendiğinde bilgiler sunucuya
-            iletilecektir.
-          </Helper>
-          <Button as={Link} to="/cart" variant="outline" fullWidth style={{ marginTop: '1rem' }}>
-            Sepete Geri Dön
-          </Button>
-        </SummaryCard>
-      </Wrapper>
-    </div>
+        </OrderSummary>
+      </Container>
+
+      {show3DSecure && (
+        <Modal>
+          <IframeContainer>
+            <CloseButton onClick={close3DSecure}>İptal</CloseButton>
+            <iframe
+              srcDoc={iframeHtml}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="3D Secure"
+            />
+          </IframeContainer>
+        </Modal>
+      )}
+    </>
   );
 };
 

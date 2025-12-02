@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import supabase from '../services/supabaseClient';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
-const STORAGE_KEY = 'becca-giyim-cart';
 
 const defaultItem = (product, options = {}) => ({
-  id: product.id,
+  product_id: product.id,
   title: product.title,
   price: product.price,
   image: product.heroImage || product.image,
@@ -17,53 +18,122 @@ const defaultItem = (product, options = {}) => ({
 
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
+  const { user } = useAuth();
 
+  // Sync from Supabase when user logs in
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored));
-      } catch (error) {
-        console.warn('Sepet verisi okunamadı', error);
-      }
+    if (user) {
+      syncCartFromSupabase();
+    } else {
+      setItems([]);
     }
-  }, []);
+  }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const syncCartFromSupabase = async () => {
+    if (!user) return;
 
-  const addItem = (product, options) => {
-    setItems(prev => {
-      const existingIndex = prev.findIndex(item => 
-        item.id === product.id && item.size === options?.size && item.color === options?.color
-      );
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += options?.quantity || 1;
-        return updated;
+    try {
+      const { data, error } = await supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setItems(data || []);
+    } catch (error) {
+      console.error('Sepet yüklenemedi:', error);
+    }
+  };
+
+  const addItem = async (product, options = {}) => {
+    if (!user) {
+      alert('Sepete eklemek için giriş yapmalısınız');
+      return;
+    }
+
+    const newItem = defaultItem(product, options);
+    newItem.user_id = user.id;
+
+    try {
+      // Check if item exists
+      const { data: existing } = await supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('product_id', product.id)
+        .eq('size', newItem.size)
+        .eq('color', newItem.color)
+        .maybeSingle();
+
+      if (existing) {
+        // Update quantity
+        const { error } = await supabase
+          .from('cart_items')
+          .update({ quantity: existing.quantity + newItem.quantity })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from('cart_items')
+          .insert([newItem]);
+
+        if (error) throw error;
       }
-      return [...prev, defaultItem(product, options)];
-    });
+
+      await syncCartFromSupabase();
+    } catch (error) {
+      console.error('Sepete eklenemedi:', error);
+      alert('Sepete eklenirken hata oluştu: ' + error.message);
+    }
   };
 
-  const updateQuantity = (productId, quantity, meta = {}) => {
-    if (quantity <= 0) return removeItem(productId, meta);
-    setItems(prev => prev.map(item => {
-      if (item.id === productId && item.size === meta.size && item.color === meta.color) {
-        return { ...item, quantity };
-      }
-      return item;
-    }));
+  const updateQuantity = async (itemId, quantity) => {
+    if (quantity <= 0) return removeItem(itemId);
+
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .update({ quantity })
+        .eq('id', itemId);
+
+      if (error) throw error;
+      await syncCartFromSupabase();
+    } catch (error) {
+      console.error('Güncelleme hatası:', error);
+    }
   };
 
-  const removeItem = (productId, meta = {}) => {
-    setItems(prev => prev.filter(item => 
-      !(item.id === productId && item.size === meta.size && item.color === meta.color)
-    ));
+  const removeItem = async (itemId) => {
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) throw error;
+      await syncCartFromSupabase();
+    } catch (error) {
+      console.error('Silme hatası:', error);
+    }
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setItems([]);
+    } catch (error) {
+      console.error('Sepet temizlenemedi:', error);
+    }
+  };
 
   const summary = useMemo(() => {
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
