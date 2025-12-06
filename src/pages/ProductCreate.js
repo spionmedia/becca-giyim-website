@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { FiUpload, FiX, FiImage } from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import categoryMeta from '../constants/categoryMeta';
 import { addProduct } from '../services/productService';
+import { uploadProductImage, uploadMultipleImages } from '../services/storageService';
 
 const Page = styled.section`
   display: grid;
@@ -82,6 +84,93 @@ const TextArea = styled.textarea`
 const Helper = styled.span`
   font-size: ${props => props.theme.typography.fontSize.sm};
   color: ${props => props.theme.colors.text.secondary};
+`;
+
+const ImageUploadArea = styled.div`
+  border: 2px dashed ${props => props.isDragging ? props.theme.colors.primary : props.theme.colors.text.disabled};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: ${props => props.theme.spacing.xl};
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: ${props => props.isDragging ? props.theme.colors.primary + '10' : 'transparent'};
+
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.primary}10;
+  }
+`;
+
+const UploadIcon = styled.div`
+  font-size: 3rem;
+  color: ${props => props.theme.colors.text.secondary};
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+const ImagePreviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: ${props => props.theme.spacing.md};
+  margin-top: ${props => props.theme.spacing.md};
+`;
+
+const ImagePreviewItem = styled.div`
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: ${props => props.theme.borderRadius.md};
+  overflow: hidden;
+  border: 2px solid ${props => props.isMain ? props.theme.colors.primary : 'transparent'};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const RemoveImageButton = styled.button`
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+
+  &:hover {
+    background: #d14343;
+  }
+`;
+
+const MainBadge = styled.span`
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+`;
+
+const UploadProgress = styled.div`
+  margin-top: ${props => props.theme.spacing.sm};
+  padding: ${props => props.theme.spacing.sm};
+  background: ${props => props.theme.colors.primary}15;
+  border-radius: ${props => props.theme.borderRadius.sm};
+  color: ${props => props.theme.colors.primary};
+  font-size: ${props => props.theme.typography.fontSize.sm};
 `;
 
 const ColorList = styled.div`
@@ -173,7 +262,7 @@ const initialForm = {
   tagsInput: '',
 };
 
-const sizePresets = ['XS','S','M','L','XL','34','36','38','40','42','44','46','48','50'];
+const sizePresets = ['XS', 'S', 'M', 'L', 'XL', '34', '36', '38', '40', '42', '44', '46', '48', '50'];
 
 const ProductCreate = () => {
   const [form, setForm] = useState(initialForm);
@@ -183,6 +272,10 @@ const ProductCreate = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [successProduct, setSuccessProduct] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState([]); // URL listesi
+  const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   const availableCategories = useMemo(() => {
@@ -208,9 +301,67 @@ const ProductCreate = () => {
     setSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
   };
 
+  // Dosya yükleme işlemleri
+  const handleFileSelect = async (files) => {
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const urls = await uploadMultipleImages(files);
+      setUploadedImages(prev => [...prev, ...urls]);
+
+      // İlk görsel hero image olsun
+      if (uploadedImages.length === 0 && urls.length > 0) {
+        setForm(prev => ({ ...prev, heroImage: urls[0] }));
+      }
+    } catch (err) {
+      setError('Görsel yüklenirken hata oluştu: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    handleFileSelect(files);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImages = uploadedImages.filter((_, i) => i !== index);
+    setUploadedImages(newImages);
+
+    // Hero image güncelle
+    if (index === 0 && newImages.length > 0) {
+      setForm(prev => ({ ...prev, heroImage: newImages[0] }));
+    } else if (newImages.length === 0) {
+      setForm(prev => ({ ...prev, heroImage: '' }));
+    }
+  };
+
+  const setAsMainImage = (index) => {
+    const newImages = [...uploadedImages];
+    const [selected] = newImages.splice(index, 1);
+    newImages.unshift(selected);
+    setUploadedImages(newImages);
+    setForm(prev => ({ ...prev, heroImage: selected }));
+  };
+
   const validate = () => {
     if (!form.title.trim()) return 'Ürün adı zorunludur';
-    if (!form.heroImage.trim()) return 'Hero görsel URL alanı zorunludur';
+    if (uploadedImages.length === 0) return 'En az bir ürün görseli yükleyin';
     if (!form.price) return 'Fiyat bilgisi zorunludur';
     if (!form.description.trim()) return 'Ürün açıklaması girin';
     return null;
@@ -229,11 +380,8 @@ const ProductCreate = () => {
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        heroImage: form.heroImage.trim(),
-        gallery: form.galleryInput
-          .split('\n')
-          .map(url => url.trim())
-          .filter(Boolean),
+        heroImage: uploadedImages[0] || form.heroImage.trim(),
+        gallery: uploadedImages.slice(1),
         gender: form.gender,
         category: form.category,
         price: parseFloat(form.price),
@@ -253,6 +401,7 @@ const ProductCreate = () => {
       setForm(initialForm);
       setColors([]);
       setSizes([]);
+      setUploadedImages([]);
     } catch (err) {
       setError('Ürün kaydedilirken bir sorun oluştu.');
     } finally {
@@ -264,9 +413,8 @@ const ProductCreate = () => {
     <div>
       <Title>Yeni Ürün Ekle</Title>
       <Subtitle>
-        Cloudinary veya benzeri bir CDN'e yüklediğiniz görsellerin linklerini kullanarak koleksiyona yeni ürünler
-        ekleyin. Tüm kayıtlar tarayıcıya kaydedilir ve ileride admin paneli geliştirildiğinde aynı data yapısı
-        kullanılacaktır.
+        Ürün görsellerini doğrudan yükleyin - sistem otomatik olarak URL'ye dönüştürür.
+        Birden fazla görsel yükleyebilirsiniz, ilk görsel ana görsel olarak kullanılır.
       </Subtitle>
 
       {error && <SuccessState style={{ borderColor: '#d14343', background: '#fee', color: '#d14343' }}>{error}</SuccessState>}
@@ -360,27 +508,62 @@ const ProductCreate = () => {
 
           <Section>
             <SectionTitle>Görseller</SectionTitle>
-            <FieldGrid>
-              <Input
-                label="Hero Görsel URL"
-                name="heroImage"
-                placeholder="https://res.cloudinary.com/..."
-                value={form.heroImage}
-                onChange={handleChange}
-                required
-                fullWidth
+            <ImageUploadArea
+              isDragging={isDragging}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadIcon>
+                <FiUpload />
+              </UploadIcon>
+              <p style={{ margin: 0, fontWeight: 500 }}>
+                {uploading ? 'Yükleniyor...' : 'Görselleri sürükleyin veya tıklayın'}
+              </p>
+              <Helper>PNG, JPG, WEBP - Maks. 5MB</Helper>
+              <HiddenInput
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                onChange={(e) => handleFileSelect(e.target.files)}
               />
-              <Label>
-                Galeri URL'leri
-                <TextArea
-                  name="galleryInput"
-                  placeholder={`Her satıra bir Cloudinary URL yapıştırın\nÖrn. https://res.cloudinary.com/...`}
-                  value={form.galleryInput}
-                  onChange={handleChange}
-                />
-              </Label>
-            </FieldGrid>
-            <Helper>Cloudinary'den kopyaladığınız paylaşıma açık URL'leri kullanın.</Helper>
+            </ImageUploadArea>
+
+            {uploading && (
+              <UploadProgress>
+                <FiImage style={{ marginRight: '8px' }} />
+                Görseller yükleniyor, lütfen bekleyin...
+              </UploadProgress>
+            )}
+
+            {uploadedImages.length > 0 && (
+              <ImagePreviewGrid>
+                {uploadedImages.map((url, index) => (
+                  <ImagePreviewItem key={url} isMain={index === 0}>
+                    <img src={url} alt={`Ürün görseli ${index + 1}`} />
+                    <RemoveImageButton type="button" onClick={() => handleRemoveImage(index)}>
+                      <FiX />
+                    </RemoveImageButton>
+                    {index === 0 ? (
+                      <MainBadge>Ana Görsel</MainBadge>
+                    ) : (
+                      <MainBadge
+                        style={{ background: '#666', cursor: 'pointer' }}
+                        onClick={() => setAsMainImage(index)}
+                      >
+                        Ana Yap
+                      </MainBadge>
+                    )}
+                  </ImagePreviewItem>
+                ))}
+              </ImagePreviewGrid>
+            )}
+
+            <Helper style={{ marginTop: '0.5rem' }}>
+              İlk görsel ana görsel olarak kullanılır. Tıklayarak sırayı değiştirebilirsiniz.
+            </Helper>
           </Section>
 
           <Section>
@@ -451,7 +634,7 @@ const ProductCreate = () => {
 
         <SummaryCard>
           <h3>Ön İzleme</h3>
-          <PreviewImage src={form.heroImage || 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80'} />
+          <PreviewImage src={uploadedImages[0] || 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80'} />
           <h4>{form.title || 'Ürün adı bekleniyor'}</h4>
           <Badge>{categoryMeta[form.gender]?.label}</Badge>
           <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>{form.description || 'Ürün açıklaması bu alanda görünecek.'}</p>

@@ -1,8 +1,8 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FiInstagram } from 'react-icons/fi';
 import { SiTiktok } from 'react-icons/si';
+import { motion } from 'framer-motion';
 
 const FooterContainer = styled.footer`
   background-color: ${props => props.theme.colors.primary};
@@ -74,14 +74,12 @@ const SocialIcons = styled.div`
   margin-top: ${props => props.theme.spacing.sm};
 `;
 
-const SocialIcon = styled.a`
+const SocialIcon = styled(motion.a)`
   color: white;
   font-size: 1.5rem;
-  transition: opacity 0.2s ease;
-  
-  &:hover {
-    opacity: 0.8;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Divider = styled.hr`
@@ -129,10 +127,22 @@ const Footer = () => {
               Kadın ve erkek koleksiyonlarında modern siluetler, sürdürülebilir materyaller ve zamansız tasarımlar.
             </p>
             <SocialIcons>
-              <SocialIcon href="https://www.instagram.com/beccagiyimm?igsh=d3o5cW82cjc5M21i" target="_blank" aria-label="Instagram">
+              <SocialIcon
+                href="https://www.instagram.com/beccagiyimm?igsh=d3o5cW82cjc5M21i"
+                target="_blank"
+                aria-label="Instagram"
+                whileHover={{ scale: 1.2, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <FiInstagram />
               </SocialIcon>
-              <SocialIcon href="https://www.tiktok.com/@beccagiyimm?_r=1&_t=ZS-920ClMuUMwJ" target="_blank" aria-label="TikTok">
+              <SocialIcon
+                href="https://www.tiktok.com/@beccagiyimm?_r=1&_t=ZS-920ClMuUMwJ"
+                target="_blank"
+                aria-label="TikTok"
+                whileHover={{ scale: 1.2, rotate: -5 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <SiTiktok />
               </SocialIcon>
             </SocialIcons>

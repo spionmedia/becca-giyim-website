@@ -1,29 +1,27 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FiEye } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import Button from '../common/Button';
 import categoryMeta from '../../constants/categoryMeta';
 
-const Card = styled(Link)`
+const Card = styled(motion(Link))`
   display: flex;
   flex-direction: column;
   background-color: ${props => props.theme.colors.background};
   border-radius: ${props => props.theme.borderRadius.md};
   overflow: hidden;
   box-shadow: ${props => props.theme.shadows.sm};
-  transition: all 0.3s ease;
   height: 100%;
   text-decoration: none;
   color: inherit;
   
-  &:hover {
-    box-shadow: ${props => props.theme.shadows.md};
-    transform: translateY(-4px);
-    
-    .product-image img {
-      transform: scale(1.05);
-    }
+  .product-image img {
+    transition: transform 0.5s ease;
+  }
+  
+  &:hover .product-image img {
+    transform: scale(1.08);
   }
 `;
 
@@ -134,7 +132,11 @@ const ProductCard = ({
   };
 
   return (
-    <Card to={`/product/${product.id}`}>
+    <Card
+      to={`/product/${product.id}`}
+      whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       <ImageContainer className="product-image">
         <img src={displayImage} alt={product.title} />
         {product.discount && (

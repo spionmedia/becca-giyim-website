@@ -2,10 +2,40 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import ProductCard from '../components/product/ProductCard';
 import Button from '../components/common/Button';
 import categoryMeta from '../constants/categoryMeta';
 import useProducts from '../hooks/useProducts';
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 60 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+};
+
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+};
+
+const fadeInRight = {
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } }
+};
 
 // Styled Components
 const HeroSection = styled.section`
@@ -264,51 +294,7 @@ const TestimonialAuthor = styled.div`
   }
 `;
 
-const NewsletterSection = styled.section`
-  background-color: ${props => props.theme.colors.primary};
-  color: white;
-  padding: ${props => props.theme.spacing.xl};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  text-align: center;
-  margin-bottom: ${props => props.theme.spacing.xxl};
-`;
 
-const NewsletterForm = styled.form`
-  display: flex;
-  max-width: 500px;
-  margin: ${props => props.theme.spacing.lg} auto 0;
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    flex-direction: column;
-  }
-`;
-
-const NewsletterInput = styled.input`
-  flex: 1;
-  padding: ${props => props.theme.spacing.md};
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.md} 0 0 ${props => props.theme.borderRadius.md};
-  font-size: ${props => props.theme.typography.fontSize.md};
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    border-radius: ${props => props.theme.borderRadius.md};
-    margin-bottom: ${props => props.theme.spacing.sm};
-  }
-`;
-
-const NewsletterButton = styled.button`
-  background-color: ${props => props.theme.colors.secondary};
-  color: white;
-  border: none;
-  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
-  border-radius: 0 ${props => props.theme.borderRadius.md} ${props => props.theme.borderRadius.md} 0;
-  font-weight: ${props => props.theme.typography.fontWeight.medium};
-  cursor: pointer;
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    border-radius: ${props => props.theme.borderRadius.md};
-  }
-`;
 
 const Home = () => {
   const { products: allProducts, loading } = useProducts();
@@ -369,123 +355,208 @@ const Home = () => {
     }
   ];
 
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    alert('Bülten aboneliğiniz alındı!');
-  };
+
 
   return (
     <>
       {/* Hero Section */}
       <HeroSection>
-        <HeroContent>
-          <HeroTitle>Tarzını Yansıt</HeroTitle>
-          <HeroSubtitle>
+        <HeroContent
+          as={motion.div}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInLeft}
+        >
+          <HeroTitle
+            as={motion.h1}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Tarzını Yansıt
+          </HeroTitle>
+          <HeroSubtitle
+            as={motion.p}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
             Becca Giyim ile şıklığı yeniden keşfet. Kaliteli kumaşlar ve modern tasarımlarla gardırobunuzu güncelleyin.
           </HeroSubtitle>
-          <Button
-            variant="primary"
-            size="large"
-            as={Link}
-            to="/products"
-            rightIcon={<FiArrowRight />}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Hemen Keşfet
-          </Button>
+            <Button
+              variant="primary"
+              size="large"
+              as={Link}
+              to="/products"
+              rightIcon={<FiArrowRight />}
+            >
+              Hemen Keşfet
+            </Button>
+          </motion.div>
         </HeroContent>
-        <HeroImage>
-          <img
+        <HeroImage
+          as={motion.div}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInRight}
+        >
+          <motion.img
             src="https://images.unsplash.com/photo-1562157873-818bc0726f68?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
             alt="Becca Giyim Koleksiyonu"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4 }}
           />
         </HeroImage>
       </HeroSection>
 
       {/* Featured Products Section */}
-      <section>
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={fadeInUp}
+      >
         <SectionHeader>
           <SectionTitle>Öne Çıkan Ürünler</SectionTitle>
           <ViewAllLink to="/products">
             Tümünü Gör <FiArrowRight />
           </ViewAllLink>
         </SectionHeader>
-        <ProductGrid>
+        <ProductGrid
+          as={motion.div}
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {loading ? (
             <p>Yükleniyor...</p>
           ) : featuredProducts.length > 0 ? (
-            featuredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+            featuredProducts.map((product, index) => (
+              <motion.div key={product.id} variants={scaleIn}>
+                <ProductCard product={product} />
+              </motion.div>
             ))
           ) : (
             <p>Henüz ürün eklenmemiş.</p>
           )}
         </ProductGrid>
-      </section>
+      </motion.section>
 
       {/* Categories Section */}
-      <CategorySection>
+      <CategorySection
+        as={motion.section}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={fadeInUp}
+      >
         <SectionTitle>Kategoriler</SectionTitle>
-        <CategoryGrid>
-          {categories.map(category => (
-            <CategoryCard key={category.id}>
-              <Link to={`/${category.id}`}>
-                <img src={category.image} alt={category.name} />
-                <CategoryOverlay>
-                  <h3>{category.name}</h3>
-                </CategoryOverlay>
-              </Link>
-            </CategoryCard>
+        <CategoryGrid
+          as={motion.div}
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {categories.map((category, index) => (
+            <motion.div key={category.id} variants={scaleIn}>
+              <CategoryCard
+                as={motion.div}
+                whileHover={{ y: -10, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <Link to={`/${category.id}`}>
+                  <img src={category.image} alt={category.name} />
+                  <CategoryOverlay>
+                    <h3>{category.name}</h3>
+                  </CategoryOverlay>
+                </Link>
+              </CategoryCard>
+            </motion.div>
           ))}
         </CategoryGrid>
       </CategorySection>
 
       {/* About Section */}
-      <AboutSection>
-        <AboutContent>
+      <AboutSection
+        as={motion.section}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        <AboutContent
+          as={motion.div}
+          variants={fadeInLeft}
+        >
           <SectionTitle>Hakkımızda</SectionTitle>
-          <p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
             Becca Giyim, modern ve şık tasarımlarıyla kadın ve erkek modasına yön vermek amacıyla kuruldu. Amacımız, müşterilerimize hem kaliteli hem de özgün parçalar sunmak.
-          </p>
-          <p>
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
             Tüm ürünlerimiz seçkin kumaşlardan üretilmekte ve sürdürülebilir üretim ilkelerine uyulmaktadır. Kalite ve tarz, değerlerimizin merkezinde yer alır.
-          </p>
-
+          </motion.p>
         </AboutContent>
-        <AboutImage />
+        <AboutImage
+          as={motion.div}
+          variants={fadeInRight}
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.4 }}
+        />
       </AboutSection>
 
       {/* Testimonials Section */}
-      <TestimonialSection>
+      <TestimonialSection
+        as={motion.section}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={fadeInUp}
+      >
         <SectionTitle>Müşteri Yorumları</SectionTitle>
-        <TestimonialGrid>
-          {testimonials.map(testimonial => (
-            <TestimonialCard key={testimonial.id}>
-              <p>"{testimonial.text}"</p>
-              <TestimonialAuthor>
-                <img src={testimonial.avatar} alt={testimonial.name} />
-                <div className="author-info">
-                  <h4>{testimonial.name}</h4>
-                  <span>{testimonial.title}</span>
-                </div>
-              </TestimonialAuthor>
-            </TestimonialCard>
+        <TestimonialGrid
+          as={motion.div}
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {testimonials.map((testimonial, index) => (
+            <motion.div key={testimonial.id} variants={scaleIn}>
+              <TestimonialCard
+                as={motion.div}
+                whileHover={{ y: -5, boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <p>"{testimonial.text}"</p>
+                <TestimonialAuthor>
+                  <img src={testimonial.avatar} alt={testimonial.name} />
+                  <div className="author-info">
+                    <h4>{testimonial.name}</h4>
+                    <span>{testimonial.title}</span>
+                  </div>
+                </TestimonialAuthor>
+              </TestimonialCard>
+            </motion.div>
           ))}
         </TestimonialGrid>
       </TestimonialSection>
 
-      {/* Newsletter Section */}
-      <NewsletterSection>
-        <SectionTitle>Bültenimize Abone Olun</SectionTitle>
-        <p>Yeni ürünler, kampanyalar ve indirimlerden ilk siz haberdar olun.</p>
-        <NewsletterForm onSubmit={handleNewsletterSubmit}>
-          <NewsletterInput
-            type="email"
-            placeholder="E-posta adresiniz"
-            required
-          />
-          <NewsletterButton type="submit">Abone Ol</NewsletterButton>
-        </NewsletterForm>
-      </NewsletterSection>
     </>
   );
 };

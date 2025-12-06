@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaUser, FaSignOutAlt, FaBoxOpen, FaUserCog } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaUser, FaSignOutAlt, FaBoxOpen, FaUserCog } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 
-const HeaderContainer = styled.header`
+const HeaderContainer = styled(motion.header)`
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   position: sticky;
@@ -87,7 +88,7 @@ const IconLink = styled(Link)`
   }
 `;
 
-const CartCount = styled.span`
+const CartCount = styled(motion.span)`
   position: absolute;
   top: -8px;
   right: -8px;
@@ -196,7 +197,11 @@ const Header = () => {
   };
 
   return (
-    <HeaderContainer>
+    <HeaderContainer
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
       <TopBar>
         750 TL ve Üzeri Kargo Bedava!
       </TopBar>
@@ -205,23 +210,29 @@ const Header = () => {
           {isMenuOpen ? <FaTimes /> : <FaBars />}
         </MobileMenuButton>
 
-        <Logo to="/">BECCA</Logo>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Logo to="/">BECCA</Logo>
+        </motion.div>
 
         <Menu isOpen={isMenuOpen}>
           <MenuItem><Link to="/kadin">KADIN</Link></MenuItem>
           <MenuItem><Link to="/erkek">ERKEK</Link></MenuItem>
-
           <MenuItem><Link to="/products">TÜM ÜRÜNLER</Link></MenuItem>
         </Menu>
 
         <Icons>
-
-
           {user ? (
             <UserMenu>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <motion.div
+                style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.2 }}
+              >
                 <FaUser />
-              </div>
+              </motion.div>
               <Dropdown className="dropdown">
                 <DropdownItem to="/account">
                   <FaUserCog /> Hesabım
@@ -235,13 +246,29 @@ const Header = () => {
               </Dropdown>
             </UserMenu>
           ) : (
-            <IconLink to="/login"><FaUser /></IconLink>
+            <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.2 }}>
+              <IconLink to="/login"><FaUser /></IconLink>
+            </motion.div>
           )}
 
-          <IconLink to="/cart">
-            <FaShoppingCart />
-            {cart.length > 0 && <CartCount>{cart.length}</CartCount>}
-          </IconLink>
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.2 }}>
+            <IconLink to="/cart">
+              <FaShoppingCart />
+              <AnimatePresence>
+                {cart.length > 0 && (
+                  <CartCount
+                    key="cart-count"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  >
+                    {cart.length}
+                  </CartCount>
+                )}
+              </AnimatePresence>
+            </IconLink>
+          </motion.div>
         </Icons>
       </Nav>
     </HeaderContainer>

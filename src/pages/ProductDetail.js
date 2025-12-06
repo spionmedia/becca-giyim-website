@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useParams, Link } from 'react-router-dom';
-import { FiHeart, FiShoppingCart, FiShare2, FiStar } from 'react-icons/fi';
+import { FiShoppingCart, FiShare2, FiStar } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/common/Button';
 import { getProductById } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
@@ -47,7 +48,7 @@ const BreadcrumbItem = styled.li`
   }
 `;
 
-const ProductContainer = styled.div`
+const ProductContainer = styled(motion.div)`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: ${props => props.theme.spacing.xl};
@@ -63,7 +64,7 @@ const ProductImages = styled.div`
   flex-direction: column;
 `;
 
-const MainImage = styled.div`
+const MainImage = styled(motion.div)`
   width: 100%;
   height: 500px;
   border-radius: ${props => props.theme.borderRadius.md};
@@ -74,6 +75,11 @@ const MainImage = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  
+  &:hover img {
+    transform: scale(1.05);
   }
 `;
 
@@ -82,13 +88,14 @@ const ThumbnailsContainer = styled.div`
   gap: ${props => props.theme.spacing.sm};
 `;
 
-const Thumbnail = styled.div`
+const Thumbnail = styled(motion.div)`
   width: 80px;
   height: 80px;
   border-radius: ${props => props.theme.borderRadius.sm};
   overflow: hidden;
   cursor: pointer;
   border: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  transition: border-color 0.2s ease;
   
   img {
     width: 100%;
@@ -405,10 +412,7 @@ const ProductDetail = () => {
     });
   };
 
-  const addToWishlist = () => {
-    if (!product) return;
-    alert(`${product.title} favorilere eklendi!`);
-  };
+
 
   const categoryLabel = useMemo(() => {
     if (!product) return '';
@@ -453,10 +457,28 @@ const ProductDetail = () => {
         </BreadcrumbList>
       </BreadcrumbNav>
 
-      <ProductContainer>
+      <ProductContainer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <ProductImages>
-          <MainImage>
-            <img src={images[selectedImage]} alt={product.title} />
+          <MainImage
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={selectedImage}
+                src={images[selectedImage]}
+                alt={product.title}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </AnimatePresence>
           </MainImage>
           <ThumbnailsContainer>
             {images.map((image, index) => (
@@ -464,6 +486,8 @@ const ProductDetail = () => {
                 key={index}
                 active={selectedImage === index}
                 onClick={() => setSelectedImage(index)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <img src={image} alt={`${product.title} - ${index + 1}`} />
               </Thumbnail>
@@ -471,129 +495,126 @@ const ProductDetail = () => {
           </ThumbnailsContainer>
         </ProductImages>
 
-        <ProductInfo>
-          <ProductCategory>{categoryLabel}</ProductCategory>
-          <ProductTitle>{product.title}</ProductTitle>
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <ProductInfo>
+            <ProductCategory>{categoryLabel}</ProductCategory>
+            <ProductTitle>{product.title}</ProductTitle>
 
-          <ProductRating>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <FiStar
-                key={index}
-                fill={index < Math.floor(product.rating || 0) ? 'currentColor' : 'none'}
-              />
-            ))}
-            {product.rating && <span>{product.rating}</span>}
-            {product.reviewCount && (
-              <ReviewCount>({product.reviewCount} değerlendirme)</ReviewCount>
-            )}
-          </ProductRating>
+            <ProductRating>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <FiStar
+                  key={index}
+                  fill={index < Math.floor(product.rating || 0) ? 'currentColor' : 'none'}
+                />
+              ))}
+              {product.rating && <span>{product.rating}</span>}
+              {product.reviewCount && (
+                <ReviewCount>({product.reviewCount} değerlendirme)</ReviewCount>
+              )}
+            </ProductRating>
 
-          <PriceContainer>
-            <Price>{product.price.toLocaleString('tr-TR')} ₺</Price>
-            {product.oldPrice && product.oldPrice > 0 && (
+            <PriceContainer>
+              <Price>{product.price.toLocaleString('tr-TR')} ₺</Price>
+              {product.oldPrice && product.oldPrice > 0 && (
+                <>
+                  <OldPrice>{product.oldPrice.toLocaleString('tr-TR')} ₺</OldPrice>
+                  {product.discount && (
+                    <DiscountBadge>%{product.discount} İndirim</DiscountBadge>
+                  )}
+                </>
+              )}
+            </PriceContainer>
+
+            <ProductDescription>{product.description}</ProductDescription>
+
+            <Divider />
+
+            {colorOptions.length > 0 && (
               <>
-                <OldPrice>{product.oldPrice.toLocaleString('tr-TR')} ₺</OldPrice>
-                {product.discount && (
-                  <DiscountBadge>%{product.discount} İndirim</DiscountBadge>
-                )}
+                <OptionLabel>Renk: {selectedColor}</OptionLabel>
+                <ColorOptions>
+                  {colorOptions.map(color => (
+                    <ColorOption
+                      key={color.name}
+                      color={color.code}
+                      selected={selectedColor === color.name}
+                      onClick={() => color.available && setSelectedColor(color.name)}
+                      style={{
+                        opacity: color.available ? 1 : 0.5,
+                        cursor: color.available ? 'pointer' : 'not-allowed',
+                        border: color.code === '#FFFFFF' ? '1px solid #ddd' : undefined
+                      }}
+                      title={color.name}
+                    />
+                  ))}
+                </ColorOptions>
               </>
             )}
-          </PriceContainer>
 
-          <ProductDescription>{product.description}</ProductDescription>
-
-          <Divider />
-
-          {colorOptions.length > 0 && (
-            <>
-              <OptionLabel>Renk: {selectedColor}</OptionLabel>
-              <ColorOptions>
-                {colorOptions.map(color => (
-                  <ColorOption
-                    key={color.name}
-                    color={color.code}
-                    selected={selectedColor === color.name}
-                    onClick={() => color.available && setSelectedColor(color.name)}
-                    style={{
-                      opacity: color.available ? 1 : 0.5,
-                      cursor: color.available ? 'pointer' : 'not-allowed',
-                      border: color.code === '#FFFFFF' ? '1px solid #ddd' : undefined
-                    }}
-                    title={color.name}
-                  />
-                ))}
-              </ColorOptions>
-            </>
-          )}
-
-          {sizeOptions.length > 0 && (
-            <>
-              <OptionLabel>Beden: {selectedSize}</OptionLabel>
-              <SizeOptions>
-                {sizeOptions.map(size => (
-                  <SizeOption
-                    key={size.name}
-                    selected={selectedSize === size.name}
-                    disabled={!size.available}
-                    onClick={() => size.available && setSelectedSize(size.name)}
-                  >
-                    {size.name}
-                  </SizeOption>
-                ))}
-              </SizeOptions>
-            </>
-          )}
-
-          <OptionLabel>Adet</OptionLabel>
-          <QuantitySelector>
-            <QuantityButton onClick={decreaseQuantity} disabled={quantity <= 1}>-</QuantityButton>
-            <QuantityInput
-              type="number"
-              value={quantity}
-              onChange={handleQuantityChange}
-              min="1"
-            />
-            <QuantityButton onClick={increaseQuantity}>+</QuantityButton>
-          </QuantitySelector>
-
-          <ActionButtons>
-            <Button
-              variant="primary"
-              size="large"
-              fullWidth
-              leftIcon={<FiShoppingCart />}
-              onClick={addToCart}
-            >
-              Sepete Ekle
-            </Button>
-
-            <Button
-              variant="outline"
-              size="large"
-              leftIcon={<FiHeart />}
-              onClick={addToWishlist}
-            >
-              Favorilere Ekle
-            </Button>
-
-            <Button
-              variant="text"
-              size="large"
-              leftIcon={<FiShare2 />}
-              onClick={() => alert('Paylaşım linki kopyalandı!')}
-            >
-              Paylaş
-            </Button>
-          </ActionButtons>
-
-          <ProductMeta>
-            {product.sku && <p>SKU: <span>{product.sku}</span></p>}
-            <p>Kategori: <span>{categoryLabel}</span></p>
-            {product.tags?.length && (
-              <p>Etiketler: <span>{product.tags.join(', ')}</span></p>
+            {sizeOptions.length > 0 && (
+              <>
+                <OptionLabel>Beden: {selectedSize}</OptionLabel>
+                <SizeOptions>
+                  {sizeOptions.map(size => (
+                    <SizeOption
+                      key={size.name}
+                      selected={selectedSize === size.name}
+                      disabled={!size.available}
+                      onClick={() => size.available && setSelectedSize(size.name)}
+                    >
+                      {size.name}
+                    </SizeOption>
+                  ))}
+                </SizeOptions>
+              </>
             )}
-          </ProductMeta>
-        </ProductInfo>
+
+            <OptionLabel>Adet</OptionLabel>
+            <QuantitySelector>
+              <QuantityButton onClick={decreaseQuantity} disabled={quantity <= 1}>-</QuantityButton>
+              <QuantityInput
+                type="number"
+                value={quantity}
+                onChange={handleQuantityChange}
+                min="1"
+              />
+              <QuantityButton onClick={increaseQuantity}>+</QuantityButton>
+            </QuantitySelector>
+
+            <ActionButtons>
+              <Button
+                variant="primary"
+                size="large"
+                fullWidth
+                leftIcon={<FiShoppingCart />}
+                onClick={addToCart}
+              >
+                Sepete Ekle
+              </Button>
+
+              <Button
+                variant="text"
+                size="large"
+                leftIcon={<FiShare2 />}
+                onClick={() => alert('Paylaşım linki kopyalandı!')}
+              >
+                Paylaş
+              </Button>
+            </ActionButtons>
+
+            <ProductMeta>
+              {product.sku && <p>SKU: <span>{product.sku}</span></p>}
+              <p>Kategori: <span>{categoryLabel}</span></p>
+              {product.tags?.length && (
+                <p>Etiketler: <span>{product.tags.join(', ')}</span></p>
+              )}
+            </ProductMeta>
+          </ProductInfo>
+        </motion.div>
       </ProductContainer>
     </>
   );

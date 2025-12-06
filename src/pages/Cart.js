@@ -1,6 +1,6 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/common/Button';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,7 +26,7 @@ const CartList = styled.div`
   box-shadow: ${props => props.theme.shadows.sm};
 `;
 
-const CartItem = styled.div`
+const CartItem = styled(motion.div)`
   display: grid;
   grid-template-columns: 120px 1fr 160px;
   gap: ${props => props.theme.spacing.md};
@@ -189,26 +189,35 @@ const Cart = () => {
       <Title>Sepet ({summary.itemCount} ürün)</Title>
       <Page>
         <CartList>
-          {items.map(item => (
-            <CartItem key={`${item.id}-${item.color}-${item.size}`}>
-              <ItemImage src={item.image} alt={item.title} />
-              <ItemInfo>
-                <ItemTitle>{item.title}</ItemTitle>
-                {item.color && <Meta>Renk: {item.color}</Meta>}
-                {item.size && <Meta>Beden: {item.size}</Meta>}
-                <Meta>Kategori: {item.category}</Meta>
-                <RemoveButton onClick={() => handleRemove(item)}>Kaldır</RemoveButton>
-              </ItemInfo>
-              <PriceBlock>
-                <Price>{(item.price * item.quantity).toLocaleString('tr-TR')} ₺</Price>
-                <QuantityControls>
-                  <QtyButton onClick={() => handleDecrease(item)}>-</QtyButton>
-                  <QtyValue>{item.quantity}</QtyValue>
-                  <QtyButton onClick={() => handleIncrease(item)}>+</QtyButton>
-                </QuantityControls>
-              </PriceBlock>
-            </CartItem>
-          ))}
+          <AnimatePresence>
+            {items.map((item, index) => (
+              <CartItem
+                key={`${item.id}-${item.color}-${item.size}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20, height: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                layout
+              >
+                <ItemImage src={item.image} alt={item.title} />
+                <ItemInfo>
+                  <ItemTitle>{item.title}</ItemTitle>
+                  {item.color && <Meta>Renk: {item.color}</Meta>}
+                  {item.size && <Meta>Beden: {item.size}</Meta>}
+                  <Meta>Kategori: {item.category}</Meta>
+                  <RemoveButton onClick={() => handleRemove(item)}>Kaldır</RemoveButton>
+                </ItemInfo>
+                <PriceBlock>
+                  <Price>{(item.price * item.quantity).toLocaleString('tr-TR')} ₺</Price>
+                  <QuantityControls>
+                    <QtyButton onClick={() => handleDecrease(item)}>-</QtyButton>
+                    <QtyValue>{item.quantity}</QtyValue>
+                    <QtyButton onClick={() => handleIncrease(item)}>+</QtyButton>
+                  </QuantityControls>
+                </PriceBlock>
+              </CartItem>
+            ))}
+          </AnimatePresence>
         </CartList>
 
         <SummaryCard>
