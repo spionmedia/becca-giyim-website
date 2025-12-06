@@ -12,7 +12,7 @@ serve(async (req: Request) => {
     }
 
     try {
-        const { paymentData, user, callbackUrl } = await req.json()
+        const { paymentData, user, callbackUrl, shippingAddress, billingAddress } = await req.json()
 
         const apiKey = 'gqblYQXsy4KZZD7r3ELaf8x11gt9luS9';
         const secretKey = 'sBs7CzHZEockaX6Aa4JqGy4uV088qTZ6';
@@ -39,39 +39,39 @@ serve(async (req: Request) => {
             },
             buyer: {
                 id: user.id,
-                name: user.name || 'John',
-                surname: user.surname || 'Doe',
-                gsmNumber: '+905350000000',
+                name: user.name || 'Müşteri',
+                surname: user.surname || 'Kullanıcı',
+                gsmNumber: user.gsmNumber || '+905350000000',
                 email: user.email,
-                identityNumber: '74300864791',
-                lastLoginDate: '2015-10-05 12:43:35',
-                registrationDate: '2013-04-21 15:12:09',
-                registrationAddress: 'Nidakule Goztepe, Merdivenkov Mah. Bora Sok. No:1',
+                identityNumber: user.identityNumber || '11111111111',
+                lastLoginDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                registrationDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                registrationAddress: shippingAddress?.address || 'Adres bilgisi girilmedi',
                 ip: '85.34.78.112',
-                city: 'Istanbul',
-                country: 'Turkey',
-                zipCode: '34732'
+                city: shippingAddress?.city || 'Istanbul',
+                country: shippingAddress?.country || 'Turkey',
+                zipCode: shippingAddress?.zipCode || '34000'
             },
             shippingAddress: {
-                contactName: user.name || 'Jane Doe',
-                city: 'Istanbul',
-                country: 'Turkey',
-                address: 'Nidakule Goztepe, Merdivenkov Mah. Bora Sok. No:1',
-                zipCode: '34742'
+                contactName: shippingAddress?.contactName || user.name || 'Müşteri',
+                city: shippingAddress?.city || 'Istanbul',
+                country: shippingAddress?.country || 'Turkey',
+                address: shippingAddress?.address || 'Adres bilgisi girilmedi',
+                zipCode: shippingAddress?.zipCode || '34000'
             },
             billingAddress: {
-                contactName: user.name || 'Jane Doe',
-                city: 'Istanbul',
-                country: 'Turkey',
-                address: 'Nidakule Goztepe, Merdivenkov Mah. Bora Sok. No:1',
-                zipCode: '34742'
+                contactName: billingAddress?.contactName || shippingAddress?.contactName || user.name || 'Müşteri',
+                city: billingAddress?.city || shippingAddress?.city || 'Istanbul',
+                country: billingAddress?.country || shippingAddress?.country || 'Turkey',
+                address: billingAddress?.address || shippingAddress?.address || 'Adres bilgisi girilmedi',
+                zipCode: billingAddress?.zipCode || shippingAddress?.zipCode || '34000'
             },
             basketItems: [
                 {
                     id: 'BI101',
                     name: 'Product',
-                    category1: 'Fashion',
-                    category2: 'Clothing',
+                    category1: 'Giyim',
+                    category2: 'Aksesuar',
                     itemType: 'PHYSICAL',
                     price: paymentData.price
                 }

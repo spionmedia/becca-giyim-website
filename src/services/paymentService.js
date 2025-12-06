@@ -10,6 +10,8 @@ export const processPayment3D = async (paymentData, user, totalAmount, callbackU
 
         const phone = shippingAddress?.phone || user.user_metadata?.phone || '5555555555';
         const cleanPhone = phone.replace(/\D/g, '');
+        // Telefon numarasını +90 formatında gönder
+        const formattedPhone = cleanPhone.startsWith('90') ? `+${cleanPhone}` : `+90${cleanPhone}`;
 
         const { data, error } = await supabase.functions.invoke('payment', {
             body: {
@@ -27,7 +29,7 @@ export const processPayment3D = async (paymentData, user, totalAmount, callbackU
                     email: user.email,
                     name: firstName,
                     surname: lastName,
-                    gsmNumber: cleanPhone,
+                    gsmNumber: formattedPhone,
                     identityNumber: '11111111111' // Iyzico test için gerekli
                 },
                 shippingAddress: shippingAddress ? {

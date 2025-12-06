@@ -208,14 +208,14 @@ const SizeOption = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid ${props => props.selected 
-    ? props.theme.colors.primary 
+  border: 1px solid ${props => props.selected
+    ? props.theme.colors.primary
     : props.theme.colors.text.disabled};
-  background-color: ${props => props.selected 
-    ? props.theme.colors.primary 
+  background-color: ${props => props.selected
+    ? props.theme.colors.primary
     : 'transparent'};
-  color: ${props => props.selected 
-    ? 'white' 
+  color: ${props => props.selected
+    ? 'white'
     : props.theme.colors.text.primary};
   border-radius: ${props => props.theme.borderRadius.sm};
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
@@ -373,26 +373,38 @@ const ProductDetail = () => {
       setQuantity(value);
     }
   };
-  
+
   const decreaseQuantity = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
     }
   };
-  
+
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
   };
-  
+
   const addToCart = () => {
     if (!product) return;
+
+    // Renk ve beden kontrolü
+    if (colorOptions.length > 0 && !selectedColor) {
+      alert('Lütfen bir renk seçiniz!');
+      return;
+    }
+
+    if (sizeOptions.length > 0 && !selectedSize) {
+      alert('Lütfen bir beden seçiniz!');
+      return;
+    }
+
     addItem(product, {
       color: selectedColor,
       size: selectedSize,
       quantity
     });
   };
-  
+
   const addToWishlist = () => {
     if (!product) return;
     alert(`${product.title} favorilere eklendi!`);
@@ -412,7 +424,7 @@ const ProductDetail = () => {
   if (error || !product) {
     return <p>Ürün bulunamadı.</p>;
   }
-  
+
   return (
     <>
       <BreadcrumbNav aria-label="breadcrumb">
@@ -440,7 +452,7 @@ const ProductDetail = () => {
           <BreadcrumbItem>{product.title}</BreadcrumbItem>
         </BreadcrumbList>
       </BreadcrumbNav>
-      
+
       <ProductContainer>
         <ProductImages>
           <MainImage>
@@ -448,8 +460,8 @@ const ProductDetail = () => {
           </MainImage>
           <ThumbnailsContainer>
             {images.map((image, index) => (
-              <Thumbnail 
-                key={index} 
+              <Thumbnail
+                key={index}
                 active={selectedImage === index}
                 onClick={() => setSelectedImage(index)}
               >
@@ -458,14 +470,14 @@ const ProductDetail = () => {
             ))}
           </ThumbnailsContainer>
         </ProductImages>
-        
+
         <ProductInfo>
           <ProductCategory>{categoryLabel}</ProductCategory>
           <ProductTitle>{product.title}</ProductTitle>
-          
+
           <ProductRating>
             {Array.from({ length: 5 }).map((_, index) => (
-              <FiStar 
+              <FiStar
                 key={index}
                 fill={index < Math.floor(product.rating || 0) ? 'currentColor' : 'none'}
               />
@@ -475,7 +487,7 @@ const ProductDetail = () => {
               <ReviewCount>({product.reviewCount} değerlendirme)</ReviewCount>
             )}
           </ProductRating>
-          
+
           <PriceContainer>
             <Price>{product.price.toLocaleString('tr-TR')} ₺</Price>
             {product.oldPrice && product.oldPrice > 0 && (
@@ -487,22 +499,22 @@ const ProductDetail = () => {
               </>
             )}
           </PriceContainer>
-          
+
           <ProductDescription>{product.description}</ProductDescription>
-          
+
           <Divider />
-          
+
           {colorOptions.length > 0 && (
             <>
               <OptionLabel>Renk: {selectedColor}</OptionLabel>
               <ColorOptions>
                 {colorOptions.map(color => (
-                  <ColorOption 
+                  <ColorOption
                     key={color.name}
                     color={color.code}
                     selected={selectedColor === color.name}
                     onClick={() => color.available && setSelectedColor(color.name)}
-                    style={{ 
+                    style={{
                       opacity: color.available ? 1 : 0.5,
                       cursor: color.available ? 'pointer' : 'not-allowed',
                       border: color.code === '#FFFFFF' ? '1px solid #ddd' : undefined
@@ -513,13 +525,13 @@ const ProductDetail = () => {
               </ColorOptions>
             </>
           )}
-          
+
           {sizeOptions.length > 0 && (
             <>
               <OptionLabel>Beden: {selectedSize}</OptionLabel>
               <SizeOptions>
                 {sizeOptions.map(size => (
-                  <SizeOption 
+                  <SizeOption
                     key={size.name}
                     selected={selectedSize === size.name}
                     disabled={!size.available}
@@ -531,22 +543,22 @@ const ProductDetail = () => {
               </SizeOptions>
             </>
           )}
-          
+
           <OptionLabel>Adet</OptionLabel>
           <QuantitySelector>
             <QuantityButton onClick={decreaseQuantity} disabled={quantity <= 1}>-</QuantityButton>
-            <QuantityInput 
-              type="number" 
+            <QuantityInput
+              type="number"
               value={quantity}
               onChange={handleQuantityChange}
               min="1"
             />
             <QuantityButton onClick={increaseQuantity}>+</QuantityButton>
           </QuantitySelector>
-          
+
           <ActionButtons>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="large"
               fullWidth
               leftIcon={<FiShoppingCart />}
@@ -554,18 +566,18 @@ const ProductDetail = () => {
             >
               Sepete Ekle
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               size="large"
               leftIcon={<FiHeart />}
               onClick={addToWishlist}
             >
               Favorilere Ekle
             </Button>
-            
-            <Button 
-              variant="text" 
+
+            <Button
+              variant="text"
               size="large"
               leftIcon={<FiShare2 />}
               onClick={() => alert('Paylaşım linki kopyalandı!')}
@@ -573,7 +585,7 @@ const ProductDetail = () => {
               Paylaş
             </Button>
           </ActionButtons>
-          
+
           <ProductMeta>
             {product.sku && <p>SKU: <span>{product.sku}</span></p>}
             <p>Kategori: <span>{categoryLabel}</span></p>

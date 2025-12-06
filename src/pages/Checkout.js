@@ -56,10 +56,10 @@ const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: ${props => props.total ? '18px' : '14px'};
-  font-weight: ${props => props.total ? 'bold' : 'normal'};
-  padding-top: ${props => props.total ? '10px' : '0'};
-  border-top: ${props => props.total ? '1px solid #ddd' : 'none'};
+  font-size: ${props => props.$isTotal ? '18px' : '14px'};
+  font-weight: ${props => props.$isTotal ? 'bold' : 'normal'};
+  padding-top: ${props => props.$isTotal ? '10px' : '0'};
+  border-top: ${props => props.$isTotal ? '1px solid #ddd' : 'none'};
 `;
 
 const Button = styled.button`
@@ -158,6 +158,30 @@ const Checkout = () => {
     }
   };
 
+  // Iframe'den gelen mesajları dinle
+  React.useEffect(() => {
+    const handleMessage = (event) => {
+      console.log('Received message:', event.data);
+
+      if (event.data.type === 'PAYMENT_CALLBACK') {
+        console.log('Payment callback received in parent');
+        setShow3DSecure(false);
+
+        // React router'a yönlendir
+        const params = new URLSearchParams();
+        if (event.data.conversationId) params.append('conversationId', event.data.conversationId);
+        if (event.data.paymentId) params.append('paymentId', event.data.paymentId);
+        if (event.data.status) params.append('status', event.data.status);
+        if (event.data.mdStatus) params.append('mdStatus', event.data.mdStatus);
+
+        navigate(`/payment-callback?${params.toString()}`);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -191,8 +215,8 @@ const Checkout = () => {
       };
       setPendingOrderData(orderData);
 
-      // Callback URL
-      const callbackUrl = `${window.location.origin}/payment-callback`;
+      // Callback URL - Supabase Edge Function kullan
+      const callbackUrl = 'https://zcyzcxinohycrtkpynlm.supabase.co/functions/v1/payment-callback-redirect';
 
       // 3D Secure'ü başlat - gerçek adres ve telefon bilgileriyle
       const response = await processPayment3D(
@@ -370,7 +394,7 @@ const Checkout = () => {
               <span>{(item.price * item.quantity).toFixed(2)} TL</span>
             </SummaryRow>
           ))}
-          <SummaryRow total>
+          <SummaryRow $isTotal>
             <span>Toplam</span>
             <span>{summary.subtotal.toFixed(2)} TL</span>
           </SummaryRow>

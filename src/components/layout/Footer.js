@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi';
+import { FiInstagram } from 'react-icons/fi';
+import { SiTiktok } from 'react-icons/si';
 
 const FooterContainer = styled.footer`
   background-color: ${props => props.theme.colors.primary};
@@ -22,7 +23,7 @@ const FooterContent = styled.div`
 
 const FooterGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: ${props => props.theme.spacing.xl};
   
   @media (max-width: ${props => props.theme.breakpoints.tablet}) {
@@ -83,44 +84,6 @@ const SocialIcon = styled.a`
   }
 `;
 
-const Newsletter = styled.div`
-  margin-top: ${props => props.theme.spacing.md};
-`;
-
-const NewsletterForm = styled.form`
-  display: flex;
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    flex-direction: column;
-  }
-`;
-
-const NewsletterInput = styled.input`
-  padding: ${props => props.theme.spacing.sm};
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.md} 0 0 ${props => props.theme.borderRadius.md};
-  flex-grow: 1;
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    border-radius: ${props => props.theme.borderRadius.md};
-    margin-bottom: ${props => props.theme.spacing.sm};
-  }
-`;
-
-const NewsletterButton = styled.button`
-  background-color: ${props => props.theme.colors.secondary};
-  color: white;
-  border: none;
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
-  border-radius: 0 ${props => props.theme.borderRadius.md} ${props => props.theme.borderRadius.md} 0;
-  cursor: pointer;
-  font-weight: ${props => props.theme.typography.fontWeight.medium};
-  
-  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    border-radius: ${props => props.theme.borderRadius.md};
-  }
-`;
-
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -156,11 +119,6 @@ const PaymentIcon = styled.img`
 `;
 
 const Footer = () => {
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    // Newsletter form işleme
-  };
-
   return (
     <FooterContainer>
       <FooterContent>
@@ -171,17 +129,11 @@ const Footer = () => {
               Kadın ve erkek koleksiyonlarında modern siluetler, sürdürülebilir materyaller ve zamansız tasarımlar.
             </p>
             <SocialIcons>
-              <SocialIcon href="https://facebook.com" target="_blank" aria-label="Facebook">
-                <FiFacebook />
-              </SocialIcon>
-              <SocialIcon href="https://instagram.com" target="_blank" aria-label="Instagram">
+              <SocialIcon href="https://www.instagram.com/beccagiyimm?igsh=d3o5cW82cjc5M21i" target="_blank" aria-label="Instagram">
                 <FiInstagram />
               </SocialIcon>
-              <SocialIcon href="https://twitter.com" target="_blank" aria-label="Twitter">
-                <FiTwitter />
-              </SocialIcon>
-              <SocialIcon href="https://youtube.com" target="_blank" aria-label="YouTube">
-                <FiYoutube />
+              <SocialIcon href="https://www.tiktok.com/@beccagiyimm?_r=1&_t=ZS-920ClMuUMwJ" target="_blank" aria-label="TikTok">
+                <SiTiktok />
               </SocialIcon>
             </SocialIcons>
           </FooterSection>
@@ -213,22 +165,7 @@ const Footer = () => {
             </FooterList>
           </FooterSection>
 
-          <FooterSection>
-            <FooterTitle>Bülten</FooterTitle>
-            <p style={{ color: 'rgba(255, 255, 255, 0.85)', marginBottom: '1rem' }}>
-              Drop koleksiyonları, styling önerileri ve özel kampanyalara ilk siz erişin.
-            </p>
-            <Newsletter>
-              <NewsletterForm onSubmit={handleNewsletterSubmit}>
-                <NewsletterInput
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  required
-                />
-                <NewsletterButton type="submit">Abone Ol</NewsletterButton>
-              </NewsletterForm>
-            </Newsletter>
-          </FooterSection>
+
         </FooterGrid>
 
         <Divider />

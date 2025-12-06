@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödeme İşleniyor...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Ödemeniz İşleniyor</h2>
+        <div class="spinner"></div>
+        <p>Lütfen bekleyin, sayfayı kapatmayın...</p>
+    </div>
+
+    <script>
+        console.log('Payment callback page loaded');
+        console.log('Full URL:', window.location.href);
+
+        // URL parametrelerini al
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Tüm parametreleri logla
+        for (const [key, value] of urlParams.entries()) {
+            console.log('Param ' + key + ':', value);
+        }
+
+        const conversationId = urlParams.get('conversationId');
+        const paymentId = urlParams.get('paymentId');
+        const status = urlParams.get('status');
+        const mdStatus = urlParams.get('mdStatus');
+
+        console.log('Extracted params:', { conversationId, paymentId, status, mdStatus });
+
+        // Eğer iframe içindeyse parent'a mesaj gönder
+        if (window.parent !== window) {
+            console.log('Inside iframe, posting message to parent');
+            window.parent.postMessage({
+                type: 'PAYMENT_CALLBACK',
+                conversationId: conversationId,
+                paymentId: paymentId,
+                status: status,
+                mdStatus: mdStatus
+            }, '*');
+        } else {
+            // Değilse React uygulamasına yönlendir
+            console.log('Not in iframe, redirecting to React app');
+            setTimeout(function () {
+                const params = new URLSearchParams();
+                if (conversationId) params.append('conversationId', conversationId);
+                if (paymentId) params.append('paymentId', paymentId);
+                if (status) params.append('status', status);
+                if (mdStatus) params.append('mdStatus', mdStatus);
+
+                const targetUrl = window.location.origin + '/#/payment-callback?' + params.toString();
+                console.log('Redirecting to:', targetUrl);
+                window.location.href = targetUrl;
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>

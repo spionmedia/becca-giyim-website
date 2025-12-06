@@ -110,6 +110,17 @@ const OrderDetail = () => {
         {order.tracking_number && <p><strong>Kargo Takip No:</strong> {order.tracking_number}</p>}
       </Card>
 
+      {order.shipping_address && (
+        <Card>
+          <h3>Teslimat Adresi</h3>
+          <p><strong>Ad Soyad:</strong> {order.shipping_address.full_name}</p>
+          <p><strong>Telefon:</strong> {order.shipping_address.phone}</p>
+          <p><strong>Adres:</strong> {order.shipping_address.address_line}</p>
+          <p><strong>İlçe/İl:</strong> {order.shipping_address.district} / {order.shipping_address.city}</p>
+          {order.shipping_address.zip_code && <p><strong>Posta Kodu:</strong> {order.shipping_address.zip_code}</p>}
+        </Card>
+      )}
+
       <Card>
         <h3>Ürünler</h3>
         {items.map(item => (

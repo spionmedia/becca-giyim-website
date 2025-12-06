@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FiHeart, FiShoppingCart } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { FiEye } from 'react-icons/fi';
 import Button from '../common/Button';
 import categoryMeta from '../../constants/categoryMeta';
 
-const Card = styled.div`
+const Card = styled(Link)`
   display: flex;
   flex-direction: column;
   background-color: ${props => props.theme.colors.background};
@@ -13,6 +14,8 @@ const Card = styled.div`
   box-shadow: ${props => props.theme.shadows.sm};
   transition: all 0.3s ease;
   height: 100%;
+  text-decoration: none;
+  color: inherit;
   
   &:hover {
     box-shadow: ${props => props.theme.shadows.md};
@@ -37,34 +40,6 @@ const ImageContainer = styled.div`
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
-  }
-`;
-
-const WishlistButton = styled.button`
-  position: absolute;
-  top: ${props => props.theme.spacing.sm};
-  right: ${props => props.theme.spacing.sm};
-  background-color: ${props => props.theme.colors.background};
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: ${props => props.theme.shadows.sm};
-  z-index: 1;
-  
-  svg {
-    color: ${props => props.isWishlisted 
-      ? props.theme.colors.secondary 
-      : props.theme.colors.text.primary};
-    font-size: 18px;
-  }
-  
-  &:hover svg {
-    color: ${props => props.theme.colors.secondary};
   }
 `;
 
@@ -134,7 +109,7 @@ const Actions = styled.div`
   gap: ${props => props.theme.spacing.sm};
 `;
 
-const ProductCard = ({ 
+const ProductCard = ({
   product = {
     id: 1,
     title: 'Ürün Adı',
@@ -144,11 +119,8 @@ const ProductCard = ({
     oldPrice: 249.99,
     discount: 20,
     image: 'https://via.placeholder.com/300',
-    heroImage: '',
-    isWishlisted: false
-  },
-  onAddToCart,
-  onToggleWishlist
+    heroImage: ''
+  }
 }) => {
   const displayImage = product.image || product.heroImage;
 
@@ -161,50 +133,34 @@ const ProductCard = ({
     return subcategory?.label || genderMeta?.label || product.category;
   };
 
-  const handleAddToCart = () => {
-    if (onAddToCart) onAddToCart(product);
-  };
-  
-  const handleToggleWishlist = (e) => {
-    e.preventDefault();
-    if (onToggleWishlist) onToggleWishlist(product);
-  };
-  
   return (
-    <Card>
+    <Card to={`/product/${product.id}`}>
       <ImageContainer className="product-image">
         <img src={displayImage} alt={product.title} />
-        <WishlistButton 
-          onClick={handleToggleWishlist} 
-          isWishlisted={product.isWishlisted}
-          aria-label={product.isWishlisted ? "Favorilerden çıkar" : "Favorilere ekle"}
-        >
-          <FiHeart fill={product.isWishlisted ? "currentColor" : "none"} />
-        </WishlistButton>
         {product.discount && (
           <DiscountBadge>%{product.discount} İndirim</DiscountBadge>
         )}
       </ImageContainer>
-      
+
       <Content>
         <Category>{getCategoryLabel()}</Category>
         <Title>{product.title}</Title>
-        
+
         <PriceContainer>
           <Price>{product.price.toLocaleString('tr-TR')} ₺</Price>
           {product.oldPrice && (
             <OldPrice>{product.oldPrice.toLocaleString('tr-TR')} ₺</OldPrice>
           )}
         </PriceContainer>
-        
+
         <Actions>
-          <Button 
-            variant="primary" 
-            fullWidth 
-            onClick={handleAddToCart}
-            leftIcon={<FiShoppingCart />}
+          <Button
+            variant="primary"
+            fullWidth
+            as="div"
+            leftIcon={<FiEye />}
           >
-            Sepete Ekle
+            İncele
           </Button>
         </Actions>
       </Content>

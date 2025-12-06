@@ -177,6 +177,15 @@ const AdminOrders = () => {
                             <strong>Müşteri ID:</strong> {order.user_id}
                             <br />
                             <strong>Ödeme ID:</strong> {order.payment_id}
+                            {order.shipping_address && (
+                                <>
+                                    <br /><br />
+                                    <strong>Teslimat Adresi:</strong><br />
+                                    {order.shipping_address.full_name} - {order.shipping_address.phone}<br />
+                                    {order.shipping_address.address_line}<br />
+                                    {order.shipping_address.district} / {order.shipping_address.city} {order.shipping_address.zip_code}
+                                </>
+                            )}
                         </div>
                     </OrderCard>
                 ))
