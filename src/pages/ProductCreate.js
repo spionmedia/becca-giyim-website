@@ -257,18 +257,37 @@ const initialForm = {
   category: 'takim',
   price: '',
   oldPrice: '',
-  inventory: '',
   discount: '',
   tagsInput: '',
 };
 
-const sizePresets = ['XS', 'S', 'M', 'L', 'XL', '34', '36', '38', '40', '42', '44', '46', '48', '50'];
+const sizePresets = ['Normal', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL', '9XL', '10XL', '34', '36', '38', '40', '42', '44', '46', '48', '50'];
+
+const colorPresets = [
+  { name: 'Siyah', code: '#000000' },
+  { name: 'Beyaz', code: '#FFFFFF' },
+  { name: 'Gri', code: '#808080' },
+  { name: 'Krem', code: '#FFFDD0' },
+  { name: 'Bej', code: '#F5F5DC' },
+  { name: 'Kahverengi', code: '#8B4513' },
+  { name: 'Kırmızı', code: '#FF0000' },
+  { name: 'Pembe', code: '#FFC0CB' },
+  { name: 'Turuncu', code: '#FFA500' },
+  { name: 'Sarı', code: '#FFFF00' },
+  { name: 'Yeşil', code: '#008000' },
+  { name: 'Mavi', code: '#0000FF' },
+  { name: 'Lacivert', code: '#000080' },
+  { name: 'Mor', code: '#800080' },
+  { name: 'Bordo', code: '#800020' },
+  { name: 'Şampanya', code: '#F7E7CE' },
+  { name: 'Altın', code: '#FFD700' },
+  { name: 'Gümüş', code: '#C0C0C0' },
+];
 
 const ProductCreate = () => {
   const [form, setForm] = useState(initialForm);
-  const [colorDraft, setColorDraft] = useState({ name: '', code: '#000000' });
   const [colors, setColors] = useState([]);
-  const [sizes, setSizes] = useState([]);
+  const [sizeStock, setSizeStock] = useState({}); // { "M": 2, "L": 1, "XL": 3 }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [successProduct, setSuccessProduct] = useState(null);
@@ -287,18 +306,35 @@ const ProductCreate = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddColor = () => {
-    if (!colorDraft.name.trim()) return;
-    setColors(prev => [...prev, { name: colorDraft.name.trim(), code: colorDraft.code }]);
-    setColorDraft({ name: '', code: '#000000' });
+  const handleAddColor = (color) => {
+    if (!colors.find(c => c.name === color.name)) {
+      setColors(prev => [...prev, color]);
+    }
   };
 
   const handleRemoveColor = (index) => {
     setColors(prev => prev.filter((_, idx) => idx !== index));
   };
 
+  const handleSizeStockChange = (size, quantity) => {
+    const qty = parseInt(quantity, 10) || 0;
+    setSizeStock(prev => {
+      if (qty <= 0) {
+        const { [size]: removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [size]: qty };
+    });
+  };
+
   const toggleSize = (size) => {
-    setSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
+    setSizeStock(prev => {
+      if (prev.hasOwnProperty(size)) {
+        const { [size]: removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [size]: 1 };
+    });
   };
 
   // Dosya yükleme işlemleri
@@ -364,8 +400,12 @@ const ProductCreate = () => {
     if (uploadedImages.length === 0) return 'En az bir ürün görseli yükleyin';
     if (!form.price) return 'Fiyat bilgisi zorunludur';
     if (!form.description.trim()) return 'Ürün açıklaması girin';
+    if (Object.keys(sizeStock).length === 0) return 'En az bir beden ve stok miktarı seçin';
     return null;
   };
+
+  // Toplam stok hesapla
+  const totalStock = Object.values(sizeStock).reduce((sum, qty) => sum + qty, 0);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -386,10 +426,9 @@ const ProductCreate = () => {
         category: form.category,
         price: parseFloat(form.price),
         oldPrice: form.oldPrice ? parseFloat(form.oldPrice) : 0,
-        inventory: form.inventory ? parseInt(form.inventory, 10) : 0,
         discount: form.discount ? parseInt(form.discount, 10) : null,
         colors,
-        sizes,
+        sizeStock, // Beden bazlı stok: { "M": 2, "L": 1 }
         tags: form.tagsInput
           .split(',')
           .map(tag => tag.trim())
@@ -400,7 +439,7 @@ const ProductCreate = () => {
       setSuccessProduct(created);
       setForm(initialForm);
       setColors([]);
-      setSizes([]);
+      setSizeStock({});
       setUploadedImages([]);
     } catch (err) {
       setError('Ürün kaydedilirken bir sorun oluştu.');
@@ -450,14 +489,7 @@ const ProductCreate = () => {
                 onChange={handleChange}
                 fullWidth
               />
-              <Input
-                label="Stok"
-                name="inventory"
-                type="number"
-                value={form.inventory}
-                onChange={handleChange}
-                fullWidth
-              />
+              {/* Stok artık beden bazlı yönetiliyor */}
             </FieldGrid>
             <Label style={{ marginTop: '1rem' }}>
               Açıklama
@@ -568,27 +600,37 @@ const ProductCreate = () => {
 
           <Section>
             <SectionTitle>Renkler</SectionTitle>
-            <FieldGrid>
-              <Input
-                label="Renk Adı"
-                value={colorDraft.name}
-                onChange={(e) => setColorDraft(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Örn. Şampanya"
-                fullWidth
-              />
-              <Label>
-                Hex Kodu
-                <input
-                  type="color"
-                  value={colorDraft.code}
-                  onChange={(e) => setColorDraft(prev => ({ ...prev, code: e.target.value }))}
-                  style={{ height: '50px', borderRadius: '12px', border: '1px solid #dcdcdc' }}
-                />
-              </Label>
-              <Button type="button" variant="outline" onClick={handleAddColor} style={{ alignSelf: 'end' }}>
-                Renk Ekle
-              </Button>
-            </FieldGrid>
+            <Helper style={{ marginBottom: '1rem' }}>Aşağıdan renk seçin ve ekleyin</Helper>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+              {colorPresets.map(color => (
+                <button
+                  key={color.name}
+                  type="button"
+                  onClick={() => handleAddColor(color)}
+                  disabled={colors.find(c => c.name === color.name)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    background: colors.find(c => c.name === color.name) ? '#f0f0f0' : '#fff',
+                    cursor: colors.find(c => c.name === color.name) ? 'not-allowed' : 'pointer',
+                    opacity: colors.find(c => c.name === color.name) ? 0.5 : 1,
+                  }}
+                >
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: color.code,
+                    border: color.code === '#FFFFFF' ? '1px solid #ddd' : 'none'
+                  }} />
+                  <span style={{ fontSize: '12px' }}>{color.name}</span>
+                </button>
+              ))}
+            </div>
             <ColorList>
               {colors.map((color, index) => (
                 <ColorChip key={color.name + index}>
@@ -602,15 +644,56 @@ const ProductCreate = () => {
           </Section>
 
           <Section>
-            <SectionTitle>Bedene Göre Seçim</SectionTitle>
+            <SectionTitle>Beden ve Stok Seçimi</SectionTitle>
+            <Helper style={{ marginBottom: '1rem' }}>
+              Satışa sunmak istediğiniz bedenleri seçin ve her beden için stok miktarını girin.
+              Toplam stok: <strong>{totalStock} adet</strong>
+            </Helper>
             <SizeList>
               {sizePresets.map(size => (
-                <SizeTag key={size} type="button" active={sizes.includes(size)} onClick={() => toggleSize(size)}>
+                <SizeTag
+                  key={size}
+                  type="button"
+                  active={sizeStock.hasOwnProperty(size)}
+                  onClick={() => toggleSize(size)}
+                >
                   {size}
                 </SizeTag>
               ))}
             </SizeList>
-            {!sizes.length && <Helper>En az bir beden seçin.</Helper>}
+
+            {Object.keys(sizeStock).length > 0 && (
+              <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.75rem' }}>
+                {Object.entries(sizeStock).map(([size, qty]) => (
+                  <div key={size} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem',
+                    background: '#f5f5f5',
+                    borderRadius: '8px'
+                  }}>
+                    <span style={{ fontWeight: 'bold', minWidth: '40px' }}>{size}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={qty}
+                      onChange={(e) => handleSizeStockChange(size, e.target.value)}
+                      style={{
+                        width: '60px',
+                        padding: '0.25rem 0.5rem',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}
+                    />
+                    <span style={{ fontSize: '12px', color: '#666' }}>adet</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {Object.keys(sizeStock).length === 0 && <Helper style={{ marginTop: '0.5rem' }}>En az bir beden seçin ve stok miktarı girin.</Helper>}
           </Section>
 
           <Section>

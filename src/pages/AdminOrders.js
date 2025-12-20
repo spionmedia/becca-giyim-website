@@ -168,7 +168,10 @@ const AdminOrders = () => {
                         <ItemsList>
                             {order.order_items?.map((item, index) => (
                                 <Item key={index}>
-                                    <span>{item.product?.title || 'Ürün'} (x{item.quantity})</span>
+                                    <div>
+                                        <div>{item.product?.title || 'Ürün'} (x{item.quantity})</div>
+                                        {item.variant_name && <div style={{ fontSize: '12px', color: '#666' }}>{item.variant_name}</div>}
+                                    </div>
                                     <span>{item.price * item.quantity} TL</span>
                                 </Item>
                             ))}

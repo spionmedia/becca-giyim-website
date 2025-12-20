@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { processPayment3D } from '../services/paymentService';
+import { checkStock } from '../services/productService';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -123,6 +124,35 @@ const Checkout = () => {
   const [show3DSecure, setShow3DSecure] = useState(false);
   const [iframeHtml, setIframeHtml] = useState('');
   const [pendingOrderData, setPendingOrderData] = useState(null);
+  const [stockErrors, setStockErrors] = useState([]);
+
+  // Sayfa yüklendiğinde stok kontrolü yap
+  useEffect(() => {
+    const validateStock = async () => {
+      const errors = [];
+      for (const item of cart) {
+        if (item.size) {
+          try {
+            const result = await checkStock(item.product_id, item.size, item.quantity);
+            if (!result.available) {
+              errors.push({
+                item,
+                available: result.stock,
+                message: `"${item.title}" (${item.size}) - Stokta ${result.stock} adet var, sepetinizde ${item.quantity} adet`
+              });
+            }
+          } catch (err) {
+            console.error('Stok kontrolü hatası:', err);
+          }
+        }
+      }
+      setStockErrors(errors);
+    };
+
+    if (cart.length > 0) {
+      validateStock();
+    }
+  }, [cart]);
 
   const [address, setAddress] = useState({
     title: '',
@@ -190,9 +220,27 @@ const Checkout = () => {
       return;
     }
 
+    // Stok hatası varsa devam etme
+    if (stockErrors.length > 0) {
+      alert('Sepetinizdeki bazı ürünlerin stoğu yetersiz. Lütfen sepetinizi güncelleyin.');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Son bir kez daha stok kontrolü yap
+      for (const item of cart) {
+        if (item.size) {
+          const result = await checkStock(item.product_id, item.size, item.quantity);
+          if (!result.available) {
+            alert(`"${item.title}" (${item.size}) için yeterli stok yok. Mevcut: ${result.stock}`);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       const cleanPayment = {
         ...payment,
         cardNumber: payment.cardNumber.replace(/\s/g, '')
@@ -390,7 +438,7 @@ const Checkout = () => {
           <Title>Sipariş Özeti</Title>
           {cart.map((item, index) => (
             <SummaryRow key={index}>
-              <span>{item.title} x{item.quantity}</span>
+              <span>{item.title} ({item.size}) x{item.quantity}</span>
               <span>{(item.price * item.quantity).toFixed(2)} TL</span>
             </SummaryRow>
           ))}
@@ -398,6 +446,31 @@ const Checkout = () => {
             <span>Toplam</span>
             <span>{summary.subtotal.toFixed(2)} TL</span>
           </SummaryRow>
+
+          {stockErrors.length > 0 && (
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              background: '#fee',
+              border: '1px solid #d14343',
+              borderRadius: '8px'
+            }}>
+              <p style={{ color: '#d14343', fontWeight: 'bold', marginBottom: '10px' }}>
+                ⚠️ Stok Uyarısı
+              </p>
+              {stockErrors.map((error, idx) => (
+                <p key={idx} style={{ color: '#d14343', fontSize: '14px', marginBottom: '5px' }}>
+                  {error.message}
+                </p>
+              ))}
+              <Button
+                onClick={() => navigate('/cart')}
+                style={{ marginTop: '10px', background: '#d14343' }}
+              >
+                Sepeti Düzenle
+              </Button>
+            </div>
+          )}
         </OrderSummary>
       </Container>
 

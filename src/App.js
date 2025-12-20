@@ -15,6 +15,7 @@ import CategoryLanding from './pages/CategoryLanding';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductCreate from './pages/ProductCreate';
+import ProductEdit from './pages/ProductEdit';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import DeliveryReturns from './pages/DeliveryReturns';
 import DistanceSalesAgreement from './pages/DistanceSalesAgreement';
@@ -55,6 +56,7 @@ function App() {
                 <Route path="/:gender" element={<CategoryLanding />} />
                 <Route path="/:gender/:subcategory" element={<Products />} />
                 <Route path="/admin/urun-ekle" element={<ProductCreate />} />
+                <Route path="/admin/urun-duzenle/:id" element={<ProductEdit />} />
                 <Route path="*" element={<div>Sayfa Bulunamadı</div>} />
               </Routes>
             </Layout>

@@ -107,6 +107,19 @@ const Actions = styled.div`
   gap: ${props => props.theme.spacing.sm};
 `;
 
+const OutOfStockBadge = styled.span`
+  position: absolute;
+  top: ${props => props.theme.spacing.sm};
+  right: ${props => props.theme.spacing.sm};
+  background-color: #d14343;
+  color: white;
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.sm};
+  font-weight: ${props => props.theme.typography.fontWeight.medium};
+  font-size: ${props => props.theme.typography.fontSize.xs};
+  z-index: 1;
+`;
+
 const ProductCard = ({
   product = {
     id: 1,
@@ -117,10 +130,17 @@ const ProductCard = ({
     oldPrice: 249.99,
     discount: 20,
     image: 'https://via.placeholder.com/300',
-    heroImage: ''
+    heroImage: '',
+    inventory: 0,
+    sizeStock: {}
   }
 }) => {
   const displayImage = product.image || product.heroImage;
+
+  // Toplam stok kontrolü
+  const totalStock = product.inventory ||
+    (product.sizeStock ? Object.values(product.sizeStock).reduce((sum, qty) => sum + qty, 0) : 0);
+  const isOutOfStock = totalStock <= 0;
 
   const getCategoryLabel = () => {
     const genderMeta = categoryMeta[product.gender];
@@ -138,9 +158,12 @@ const ProductCard = ({
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <ImageContainer className="product-image">
-        <img src={displayImage} alt={product.title} />
-        {product.discount && (
+        <img src={displayImage} alt={product.title} style={{ opacity: isOutOfStock ? 0.6 : 1 }} />
+        {product.discount && !isOutOfStock && (
           <DiscountBadge>%{product.discount} İndirim</DiscountBadge>
+        )}
+        {isOutOfStock && (
+          <OutOfStockBadge>Tükendi</OutOfStockBadge>
         )}
       </ImageContainer>
 

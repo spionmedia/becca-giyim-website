@@ -50,6 +50,16 @@ export const AuthProvider = ({ children }) => {
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
+        // User metadata'ya is_admin bilgisini ekle
+        if (data?.is_admin) {
+          setUser(prev => ({
+            ...prev,
+            user_metadata: {
+              ...prev?.user_metadata,
+              is_admin: data.is_admin
+            }
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useParams, Link } from 'react-router-dom';
-import { FiShoppingCart, FiShare2, FiStar } from 'react-icons/fi';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { FiShoppingCart, FiShare2, FiStar, FiEdit } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/common/Button';
 import { getProductById } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import categoryMeta from '../constants/categoryMeta';
 
 // Styled Components
@@ -68,19 +69,45 @@ const MainImage = styled(motion.div)`
   width: 100%;
   height: 500px;
   border-radius: ${props => props.theme.borderRadius.md};
-  overflow: hidden;
   margin-bottom: ${props => props.theme.spacing.md};
+  cursor: zoom-in;
+  position: relative;
   
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
+    border-radius: ${props => props.theme.borderRadius.md};
   }
   
   &:hover img {
-    transform: scale(1.05);
+    transform: scale(1.15);
   }
+`;
+
+const ZoomModal = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  
+  img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+  }
+`;
+
+const EditButton = styled(motion.div)`
+  position: absolute;
+  top: ${props => props.theme.spacing.md};
+  right: ${props => props.theme.spacing.md};
+  z-index: 10;
 `;
 
 const ThumbnailsContainer = styled.div`
@@ -300,6 +327,8 @@ const ProductMeta = styled.div`
 const ProductDetail = () => {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -307,6 +336,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -355,10 +385,21 @@ const ProductDetail = () => {
   }, [product]);
 
   const sizeOptions = useMemo(() => {
-    if (!product?.sizes) return [];
+    if (!product?.sizeStock && !product?.sizes) return [];
+
+    // Yeni format: sizeStock objesi
+    if (product.sizeStock && typeof product.sizeStock === 'object') {
+      return Object.entries(product.sizeStock).map(([size, stock]) => ({
+        name: size,
+        stock: stock,
+        available: stock > 0
+      }));
+    }
+
+    // Eski format: sizes array
     return product.sizes.map(size => typeof size === 'string'
-      ? { name: size, available: true }
-      : size
+      ? { name: size, stock: 0, available: false }
+      : { ...size, stock: size.stock || 0, available: (size.stock || 0) > 0 }
     );
   }, [product]);
 
@@ -370,14 +411,24 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (sizeOptions.length && !selectedSize) {
-      setSelectedSize(sizeOptions[0].name);
+      // İlk stokta olan bedeni seç
+      const availableSize = sizeOptions.find(s => s.available);
+      if (availableSize) {
+        setSelectedSize(availableSize.name);
+      }
     }
   }, [sizeOptions, selectedSize]);
+
+  // Beden değiştiğinde quantity'yi 1'e sıfırla
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedSize]);
 
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
-      setQuantity(value);
+      // Stok sınırını aşmasın
+      setQuantity(Math.min(value, selectedSizeStock || 1));
     }
   };
 
@@ -388,8 +439,22 @@ const ProductDetail = () => {
   };
 
   const increaseQuantity = () => {
-    setQuantity(quantity + 1);
+    if (quantity < selectedSizeStock) {
+      setQuantity(quantity + 1);
+    }
   };
+
+  // Seçili bedenin stok bilgisi
+  const selectedSizeStock = useMemo(() => {
+    if (!selectedSize || !sizeOptions.length) return 0;
+    const sizeOption = sizeOptions.find(s => s.name === selectedSize);
+    return sizeOption?.stock || 0;
+  }, [selectedSize, sizeOptions]);
+
+  // Tüm bedenler tükendi mi?
+  const allSizesOutOfStock = useMemo(() => {
+    return sizeOptions.length > 0 && sizeOptions.every(s => !s.available);
+  }, [sizeOptions]);
 
   const addToCart = () => {
     if (!product) return;
@@ -402,6 +467,17 @@ const ProductDetail = () => {
 
     if (sizeOptions.length > 0 && !selectedSize) {
       alert('Lütfen bir beden seçiniz!');
+      return;
+    }
+
+    // Stok kontrolü
+    if (selectedSizeStock <= 0) {
+      alert('Seçtiğiniz beden stokta yok!');
+      return;
+    }
+
+    if (quantity > selectedSizeStock) {
+      alert(`Bu bedenden en fazla ${selectedSizeStock} adet alabilirsiniz.`);
       return;
     }
 
@@ -467,6 +543,7 @@ const ProductDetail = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            onClick={() => setIsZoomed(true)}
           >
             <AnimatePresence mode="wait">
               <motion.img
@@ -479,7 +556,27 @@ const ProductDetail = () => {
                 transition={{ duration: 0.3 }}
               />
             </AnimatePresence>
+
           </MainImage>
+
+          <AnimatePresence>
+            {isZoomed && (
+              <ZoomModal
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsZoomed(false)}
+              >
+                <motion.img
+                  src={images[selectedImage]}
+                  alt={product.title}
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0.8 }}
+                />
+              </ZoomModal>
+            )}
+          </AnimatePresence>
           <ThumbnailsContainer>
             {images.map((image, index) => (
               <Thumbnail
@@ -502,7 +599,19 @@ const ProductDetail = () => {
         >
           <ProductInfo>
             <ProductCategory>{categoryLabel}</ProductCategory>
-            <ProductTitle>{product.title}</ProductTitle>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
+              <ProductTitle>{product.title}</ProductTitle>
+              {user?.user_metadata?.is_admin && (
+                <Button
+                  variant="outline"
+                  size="small"
+                  leftIcon={<FiEdit />}
+                  onClick={() => navigate(`/admin/urun-duzenle/${product.id}`)}
+                >
+                  Düzenle
+                </Button>
+              )}
+            </div>
 
             <ProductRating>
               {Array.from({ length: 5 }).map((_, index) => (
@@ -557,7 +666,14 @@ const ProductDetail = () => {
 
             {sizeOptions.length > 0 && (
               <>
-                <OptionLabel>Beden: {selectedSize}</OptionLabel>
+                <OptionLabel>
+                  Beden: {selectedSize}
+                  {selectedSize && selectedSizeStock > 0 && (
+                    <span style={{ fontWeight: 'normal', color: '#666', marginLeft: '8px' }}>
+                      ({selectedSizeStock} adet stokta)
+                    </span>
+                  )}
+                </OptionLabel>
                 <SizeOptions>
                   {sizeOptions.map(size => (
                     <SizeOption
@@ -565,11 +681,18 @@ const ProductDetail = () => {
                       selected={selectedSize === size.name}
                       disabled={!size.available}
                       onClick={() => size.available && setSelectedSize(size.name)}
+                      title={size.available ? `${size.stock} adet stokta` : 'Stokta yok'}
                     >
                       {size.name}
+                      {!size.available && <span style={{ fontSize: '10px', display: 'block' }}>Tükendi</span>}
                     </SizeOption>
                   ))}
                 </SizeOptions>
+                {allSizesOutOfStock && (
+                  <p style={{ color: '#d14343', marginTop: '8px', fontWeight: 'bold' }}>
+                    Bu ürün şu anda stokta bulunmamaktadır.
+                  </p>
+                )}
               </>
             )}
 
@@ -592,8 +715,9 @@ const ProductDetail = () => {
                 fullWidth
                 leftIcon={<FiShoppingCart />}
                 onClick={addToCart}
+                disabled={allSizesOutOfStock || selectedSizeStock <= 0}
               >
-                Sepete Ekle
+                {allSizesOutOfStock ? 'Stokta Yok' : selectedSizeStock <= 0 ? 'Bu Beden Tükendi' : 'Sepete Ekle'}
               </Button>
 
               <Button

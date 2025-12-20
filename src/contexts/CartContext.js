@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import supabase from '../services/supabaseClient';
 import { useAuth } from './AuthContext';
+import { checkStock } from '../services/productService';
 
 const CartContext = createContext();
 
@@ -55,6 +56,15 @@ export const CartProvider = ({ children }) => {
     newItem.user_id = user.id;
 
     try {
+      // Stok kontrolü yap
+      if (newItem.size) {
+        const stockResult = await checkStock(product.id, newItem.size, newItem.quantity);
+        if (!stockResult.available) {
+          alert(`Bu bedenden yeterli stok yok. Mevcut stok: ${stockResult.stock}`);
+          return;
+        }
+      }
+
       // Check if item exists
       const { data: existing } = await supabase
         .from('cart_items')
@@ -66,10 +76,20 @@ export const CartProvider = ({ children }) => {
         .maybeSingle();
 
       if (existing) {
+        // Toplam miktar için stok kontrolü
+        const totalQuantity = existing.quantity + newItem.quantity;
+        if (newItem.size) {
+          const stockResult = await checkStock(product.id, newItem.size, totalQuantity);
+          if (!stockResult.available) {
+            alert(`Sepetinizde zaten ${existing.quantity} adet var. Bu bedenden en fazla ${stockResult.stock} adet alabilirsiniz.`);
+            return;
+          }
+        }
+
         // Update quantity
         const { error } = await supabase
           .from('cart_items')
-          .update({ quantity: existing.quantity + newItem.quantity })
+          .update({ quantity: totalQuantity })
           .eq('id', existing.id);
 
         if (error) throw error;
@@ -83,6 +103,7 @@ export const CartProvider = ({ children }) => {
       }
 
       await syncCartFromSupabase();
+      alert('Ürün sepete eklendi!');
     } catch (error) {
       console.error('Sepete eklenemedi:', error);
       alert('Sepete eklenirken hata oluştu: ' + error.message);
@@ -93,6 +114,17 @@ export const CartProvider = ({ children }) => {
     if (quantity <= 0) return removeItem(itemId);
 
     try {
+      // Mevcut item'ı bul
+      const item = items.find(i => i.id === itemId);
+      if (item && item.size) {
+        // Stok kontrolü
+        const stockResult = await checkStock(item.product_id, item.size, quantity);
+        if (!stockResult.available) {
+          alert(`Bu bedenden en fazla ${stockResult.stock} adet alabilirsiniz.`);
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from('cart_items')
         .update({ quantity })
