@@ -150,6 +150,20 @@ export const decreaseStock = async (productId, size, quantity) => {
   return data;
 };
 
+// Ürün silme (sadece admin)
+export const deleteProduct = async (id) => {
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+
+  const refreshed = await getProducts();
+  notifyProductsChanged(refreshed);
+  return { success: true };
+};
+
 export const getFilters = async () => {
   const products = await getProducts();
   const genders = [...new Set(products.map((product) => product.gender))];

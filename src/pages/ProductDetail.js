@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FiShoppingCart, FiShare2, FiStar, FiEdit } from 'react-icons/fi';
+import { FiShoppingCart, FiShare2, FiStar, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/common/Button';
-import { getProductById } from '../services/productService';
+import { getProductById, deleteProduct } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import categoryMeta from '../constants/categoryMeta';
@@ -337,6 +337,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -488,6 +489,24 @@ const ProductDetail = () => {
     });
   };
 
+  const handleDeleteProduct = async () => {
+    if (!window.confirm(`"${product.title}" ürününü silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await deleteProduct(product.id);
+      alert('Ürün başarıyla silindi!');
+      navigate('/products');
+    } catch (err) {
+      console.error('Silme hatası:', err);
+      alert('Ürün silinirken hata oluştu: ' + err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
 
   const categoryLabel = useMemo(() => {
@@ -602,14 +621,26 @@ const ProductDetail = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
               <ProductTitle>{product.title}</ProductTitle>
               {user?.user_metadata?.is_admin && (
-                <Button
-                  variant="outline"
-                  size="small"
-                  leftIcon={<FiEdit />}
-                  onClick={() => navigate(`/admin/urun-duzenle/${product.id}`)}
-                >
-                  Düzenle
-                </Button>
+                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    leftIcon={<FiEdit />}
+                    onClick={() => navigate(`/admin/urun-duzenle/${product.id}`)}
+                  >
+                    Düzenle
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    leftIcon={<FiTrash2 />}
+                    onClick={handleDeleteProduct}
+                    disabled={deleting}
+                    style={{ borderColor: '#d14343', color: '#d14343' }}
+                  >
+                    {deleting ? 'Siliniyor...' : 'Sil'}
+                  </Button>
+                </div>
               )}
             </div>
 
