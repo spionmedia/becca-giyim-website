@@ -4,7 +4,7 @@
   
   <!-- Ana Sayfa -->
   <url>
-    <loc>https://beccagiyim.com/</loc>
+    <loc>https://www.beccagiyim.com.tr/</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -12,7 +12,7 @@
   
   <!-- Ürünler Sayfası -->
   <url>
-    <loc>https://beccagiyim.com/#/products</loc>
+    <loc>https://www.beccagiyim.com.tr/#/products</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -20,7 +20,7 @@
   
   <!-- Kadın Kategorisi -->
   <url>
-    <loc>https://beccagiyim.com/#/kadin</loc>
+    <loc>https://www.beccagiyim.com.tr/#/kadin</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -28,7 +28,7 @@
   
   <!-- Erkek Kategorisi -->
   <url>
-    <loc>https://beccagiyim.com/#/erkek</loc>
+    <loc>https://www.beccagiyim.com.tr/#/erkek</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -36,25 +36,25 @@
   
   <!-- Kadın Alt Kategorileri -->
   <url>
-    <loc>https://beccagiyim.com/#/kadin/tisort</loc>
+    <loc>https://www.beccagiyim.com.tr/#/kadin/takim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/kadin/sweatshirt</loc>
+    <loc>https://www.beccagiyim.com.tr/#/kadin/dis-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/kadin/pantolon</loc>
+    <loc>https://www.beccagiyim.com.tr/#/kadin/alt-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/kadin/elbise</loc>
+    <loc>https://www.beccagiyim.com.tr/#/kadin/ust-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -62,19 +62,19 @@
   
   <!-- Erkek Alt Kategorileri -->
   <url>
-    <loc>https://beccagiyim.com/#/erkek/tisort</loc>
+    <loc>https://www.beccagiyim.com.tr/#/erkek/dis-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/erkek/sweatshirt</loc>
+    <loc>https://www.beccagiyim.com.tr/#/erkek/alt-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/erkek/pantolon</loc>
+    <loc>https://www.beccagiyim.com.tr/#/erkek/ust-giyim</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -82,19 +82,19 @@
   
   <!-- Yasal Sayfalar -->
   <url>
-    <loc>https://beccagiyim.com/#/gizlilik-politikasi</loc>
+    <loc>https://www.beccagiyim.com.tr/#/gizlilik-politikasi</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/teslimat-ve-iade</loc>
+    <loc>https://www.beccagiyim.com.tr/#/teslimat-ve-iade</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://beccagiyim.com/#/mesafeli-satis-sozlesmesi</loc>
+    <loc>https://www.beccagiyim.com.tr/#/mesafeli-satis-sozlesmesi</loc>
     <lastmod>2024-12-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

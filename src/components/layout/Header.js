@@ -187,11 +187,12 @@ const CategoryDropdownHeader = styled(Link)`
 
 const CategoryDropdownItem = styled(Link)`
   display: block;
-  padding: 10px 20px;
+  padding: 12px 20px;
   color: ${props => props.theme.colors.text.primary};
   text-decoration: none;
   transition: all 0.2s ease;
   font-size: 14px;
+  font-weight: 500;
 
   &:hover {
     background-color: ${props => props.theme.colors.primary}10;
@@ -199,15 +200,8 @@ const CategoryDropdownItem = styled(Link)`
     padding-left: 24px;
   }
   
-  span {
-    display: block;
-    font-size: 12px;
-    color: ${props => props.theme.colors.text.secondary};
-    margin-top: 2px;
-  }
-  
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    padding: 10px 16px 10px 24px;
+    padding: 12px 16px 12px 24px;
     
     &:hover {
       padding-left: 28px;
@@ -381,7 +375,7 @@ const Header = () => {
           transition={{ duration: 0.2 }}
         >
           <Logo to="/" aria-label="Becca Giyim Ana Sayfa">
-            <img src="/logo.jpg" alt="Becca Giyim Logo" />
+            <img src={process.env.PUBLIC_URL + '/logo.jpg'} alt="Becca Giyim Logo" />
             BECCA
           </Logo>
         </motion.div>
@@ -424,7 +418,6 @@ const Header = () => {
                       onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
                     >
                       {sub.label}
-                      <span>{sub.description}</span>
                     </CategoryDropdownItem>
                   ))}
                 </CategoryDropdown>
@@ -465,7 +458,6 @@ const Header = () => {
                       onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
                     >
                       {sub.label}
-                      <span>{sub.description}</span>
                     </CategoryDropdownItem>
                   ))}
                 </CategoryDropdown>

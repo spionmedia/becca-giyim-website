@@ -1,5 +1,5 @@
 # Becca Giyim - robots.txt
-# https://beccagiyim.com
+# https://www.beccagiyim.com.tr
 
 User-agent: *
 Allow: /
@@ -28,4 +28,4 @@ Disallow: /#/reset-password
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://beccagiyim.com/sitemap.xml
+Sitemap: https://www.beccagiyim.com.tr/sitemap.xml
