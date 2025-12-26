@@ -10,6 +10,7 @@ import Select from '../components/common/Select';
 import useProducts from '../hooks/useProducts';
 import { useCart } from '../contexts/CartContext';
 import categoryMeta from '../constants/categoryMeta';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 // Styled Components
 const PageHeader = styled.div`
@@ -109,14 +110,14 @@ const SizeOption = styled.div`
   width: 40px;
   height: 40px;
   border-radius: ${props => props.theme.borderRadius.sm};
-  border: 1px solid ${props => props.isSelected 
-    ? props.theme.colors.primary 
+  border: 1px solid ${props => props.isSelected
+    ? props.theme.colors.primary
     : props.theme.colors.text.disabled};
-  background-color: ${props => props.isSelected 
-    ? props.theme.colors.primary 
+  background-color: ${props => props.isSelected
+    ? props.theme.colors.primary
     : 'transparent'};
-  color: ${props => props.isSelected 
-    ? 'white' 
+  color: ${props => props.isSelected
+    ? 'white'
     : props.theme.colors.text.primary};
   margin: 0 ${props => props.theme.spacing.xs} ${props => props.theme.spacing.xs} 0;
   cursor: pointer;
@@ -204,11 +205,11 @@ const ViewOptions = styled.div`
 
 const ViewButton = styled.button`
   background: none;
-  border: 1px solid ${props => props.active 
-    ? props.theme.colors.primary 
+  border: 1px solid ${props => props.active
+    ? props.theme.colors.primary
     : props.theme.colors.text.disabled};
-  color: ${props => props.active 
-    ? props.theme.colors.primary 
+  color: ${props => props.active
+    ? props.theme.colors.primary
     : props.theme.colors.text.primary};
   width: 40px;
   height: 40px;
@@ -324,14 +325,14 @@ const PageButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid ${props => props.active 
-    ? props.theme.colors.primary 
+  border: 1px solid ${props => props.active
+    ? props.theme.colors.primary
     : props.theme.colors.text.disabled};
-  background-color: ${props => props.active 
-    ? props.theme.colors.primary 
+  background-color: ${props => props.active
+    ? props.theme.colors.primary
     : 'transparent'};
-  color: ${props => props.active 
-    ? 'white' 
+  color: ${props => props.active
+    ? 'white'
     : props.theme.colors.text.primary};
   border-radius: ${props => props.theme.borderRadius.sm};
   margin: 0 ${props => props.theme.spacing.xs};
@@ -394,7 +395,46 @@ const Products = () => {
     } else {
       setSelectedCategories([]);
     }
-  }, [subcategory, gender]);
+
+    // SEO güncelle
+    const genderLabel = genderMeta?.label || '';
+    const subCategoryMeta = genderMeta?.subcategories?.find(sub => sub.slug === subcategory);
+    const subCategoryLabel = subCategoryMeta?.label || '';
+
+    let seoTitle = 'Tüm Ürünler';
+    let seoDescription = PAGE_SEO.products.description;
+    let breadcrumbs = [
+      { name: 'Ana Sayfa', url: '/' },
+      { name: 'Ürünler', url: '/#/products' }
+    ];
+
+    if (gender === 'kadin') {
+      seoTitle = subcategory ? `Kadın ${subCategoryLabel}` : 'Kadın Giyim';
+      seoDescription = subcategory
+        ? `Kadın ${subCategoryLabel} modelleri Becca Giyim'de. En şık ${subCategoryLabel.toLowerCase()} ürünlerini uygun fiyatlarla keşfedin.`
+        : PAGE_SEO.kadin.description;
+      breadcrumbs.push({ name: 'Kadın', url: '/#/kadin' });
+      if (subcategory) {
+        breadcrumbs.push({ name: subCategoryLabel, url: `/#/kadin/${subcategory}` });
+      }
+    } else if (gender === 'erkek') {
+      seoTitle = subcategory ? `Erkek ${subCategoryLabel}` : 'Erkek Giyim';
+      seoDescription = subcategory
+        ? `Erkek ${subCategoryLabel} modelleri Becca Giyim'de. En şık ${subCategoryLabel.toLowerCase()} ürünlerini uygun fiyatlarla keşfedin.`
+        : PAGE_SEO.erkek.description;
+      breadcrumbs.push({ name: 'Erkek', url: '/#/erkek' });
+      if (subcategory) {
+        breadcrumbs.push({ name: subCategoryLabel, url: `/#/erkek/${subcategory}` });
+      }
+    }
+
+    updateSEO({
+      title: seoTitle,
+      description: seoDescription,
+      url: gender ? `/#/${gender}${subcategory ? '/' + subcategory : ''}` : '/#/products',
+      breadcrumbs
+    });
+  }, [subcategory, gender, genderMeta]);
 
   const toggleFilter = (filter) => {
     setOpenFilters(prev => ({
@@ -514,7 +554,7 @@ const Products = () => {
   const pageTitle = genderMeta ? genderMeta.hero.title : 'Ürünlerimiz';
   const pageDescription = subcategory
     ? genderMeta?.subcategories?.find(sub => sub.slug === subcategory)?.description
-      || 'Becca Giyim koleksiyonlarını keşfedin.'
+    || 'Becca Giyim koleksiyonlarını keşfedin.'
     : genderMeta?.hero.subtitle || 'Özel tasarım koleksiyonlarımızı keşfedin.';
 
   if (loading) {
@@ -531,15 +571,15 @@ const Products = () => {
         <PageTitle>{pageTitle}</PageTitle>
         <PageDescription>{pageDescription}</PageDescription>
       </PageHeader>
-      
+
       <ProductsHeader>
         <ProductCount>{filteredProducts.length} ürün bulundu</ProductCount>
-        
+
         <SortingOptions>
           <MobileFilterButton onClick={() => setIsFilterOpen(true)}>
             <FiFilter /> Filtrele
           </MobileFilterButton>
-          
+
           <Select
             id="sort"
             value={sortBy}
@@ -553,17 +593,17 @@ const Products = () => {
               { value: 'name-desc', label: 'İsim: Z-A' }
             ]}
           />
-          
+
           <ViewOptions>
-            <ViewButton 
-              active={view === 'grid'} 
+            <ViewButton
+              active={view === 'grid'}
               onClick={() => setView('grid')}
               aria-label="Grid görünümü"
             >
               <FiGrid />
             </ViewButton>
-            <ViewButton 
-              active={view === 'list'} 
+            <ViewButton
+              active={view === 'list'}
               onClick={() => setView('list')}
               aria-label="Liste görünümü"
             >
@@ -572,7 +612,7 @@ const Products = () => {
           </ViewOptions>
         </SortingOptions>
       </ProductsHeader>
-      
+
       <ProductsContainer>
         <Sidebar isFilterOpen={isFilterOpen}>
           <MobileFilterHeader>
@@ -581,7 +621,7 @@ const Products = () => {
               <FiX />
             </CloseFilterButton>
           </MobileFilterHeader>
-          
+
           <FilterSection>
             <FilterHeader onClick={() => toggleFilter('categories')}>
               <FilterTitle>Kategoriler</FilterTitle>
@@ -600,7 +640,7 @@ const Products = () => {
               </CheckboxGroup>
             </FilterContent>
           </FilterSection>
-          
+
           <FilterSection>
             <FilterHeader onClick={() => toggleFilter('price')}>
               <FilterTitle>Fiyat Aralığı</FilterTitle>
@@ -627,7 +667,7 @@ const Products = () => {
               </PriceInputs>
             </FilterContent>
           </FilterSection>
-          
+
           <FilterSection>
             <FilterHeader onClick={() => toggleFilter('colors')}>
               <FilterTitle>Renkler</FilterTitle>
@@ -648,7 +688,7 @@ const Products = () => {
               </div>
             </FilterContent>
           </FilterSection>
-          
+
           <FilterSection>
             <FilterHeader onClick={() => toggleFilter('sizes')}>
               <FilterTitle>Bedenler</FilterTitle>
@@ -668,23 +708,23 @@ const Products = () => {
               </div>
             </FilterContent>
           </FilterSection>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             fullWidth
             onClick={clearFilters}
           >
             Filtreleri Temizle
           </Button>
         </Sidebar>
-        
+
         <ProductsContent>
           {view === 'grid' ? (
             <ProductGrid>
               {paginatedProducts.map(product => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={product}
                   onAddToCart={handleAddToCart}
                 />
               ))}
@@ -702,15 +742,15 @@ const Products = () => {
                       <ProductCategory>{getCategoryLabel(product)}</ProductCategory>
                       <ProductTitle>{product.title}</ProductTitle>
                       <ProductDescription>{product.description}</ProductDescription>
-                      
+
                       <PriceContainer>
                         <Price>{product.price.toLocaleString('tr-TR')} ₺</Price>
                         {product.oldPrice && (
                           <OldPrice>{product.oldPrice.toLocaleString('tr-TR')} ₺</OldPrice>
                         )}
                       </PriceContainer>
-                      
-                      <Button 
+
+                      <Button
                         variant="primary"
                         onClick={() => handleAddToCart(product)}
                       >
@@ -722,18 +762,18 @@ const Products = () => {
               })}
             </ProductList>
           )}
-          
+
           {totalPages > 1 && (
             <Pagination>
-              <PageButton 
+              <PageButton
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
               >
                 &lt;
               </PageButton>
-              
+
               {Array.from({ length: totalPages }).map((_, index) => (
-                <PageButton 
+                <PageButton
                   key={index + 1}
                   active={currentPage === index + 1}
                   onClick={() => handlePageChange(index + 1)}
@@ -741,8 +781,8 @@ const Products = () => {
                   {index + 1}
                 </PageButton>
               ))}
-              
-              <PageButton 
+
+              <PageButton
                 disabled={currentPage === totalPages}
                 onClick={() => handlePageChange(currentPage + 1)}
               >

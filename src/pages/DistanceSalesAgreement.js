@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 const PageWrapper = styled.section`
   display: flex;
@@ -46,6 +47,18 @@ const List = styled.ul`
 `;
 
 const DistanceSalesAgreement = () => {
+  useEffect(() => {
+    updateSEO({
+      title: PAGE_SEO.agreement.title,
+      description: PAGE_SEO.agreement.description,
+      url: '/#/mesafeli-satis-sozlesmesi',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Mesafeli Satış Sözleşmesi', url: '/#/mesafeli-satis-sozlesmesi' }
+      ]
+    });
+  }, []);
+
   return (
     <PageWrapper>
       <div>

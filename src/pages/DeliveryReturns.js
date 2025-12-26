@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 const PageWrapper = styled.section`
   display: flex;
@@ -59,6 +60,18 @@ const InfoCard = styled.div`
 `;
 
 const DeliveryReturns = () => {
+  useEffect(() => {
+    updateSEO({
+      title: PAGE_SEO.delivery.title,
+      description: PAGE_SEO.delivery.description,
+      url: '/#/teslimat-ve-iade',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Teslimat ve İade', url: '/#/teslimat-ve-iade' }
+      ]
+    });
+  }, []);
+
   return (
     <PageWrapper>
       <div>

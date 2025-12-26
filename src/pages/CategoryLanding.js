@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../components/common/Button';
 import categoryMeta from '../constants/categoryMeta';
 import useProducts from '../hooks/useProducts';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 const Page = styled.section`
   display: flex;
@@ -140,6 +141,22 @@ const CategoryLanding = () => {
   const { gender } = useParams();
   const meta = categoryMeta[gender];
   const { products: allProducts, loading } = useProducts({ gender });
+
+  // SEO güncelle
+  useEffect(() => {
+    if (meta) {
+      const seoConfig = gender === 'kadin' ? PAGE_SEO.kadin : PAGE_SEO.erkek;
+      updateSEO({
+        title: seoConfig.title,
+        description: seoConfig.description,
+        url: `/#/${gender}`,
+        breadcrumbs: [
+          { name: 'Ana Sayfa', url: '/' },
+          { name: meta.label, url: `/#/${gender}` }
+        ]
+      });
+    }
+  }, [gender, meta]);
 
   if (!meta) {
     return <Navigate to="/" replace />;

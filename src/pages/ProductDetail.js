@@ -8,6 +8,7 @@ import { getProductById, deleteProduct } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import categoryMeta from '../constants/categoryMeta';
+import { updateSEO, setProductStructuredData } from '../utils/seo';
 
 // Styled Components
 const BreadcrumbNav = styled.nav`
@@ -353,6 +354,36 @@ const ProductDetail = () => {
           if (data?.sizes?.length) {
             const firstSize = typeof data.sizes[0] === 'string' ? data.sizes[0] : data.sizes[0].name;
             setSelectedSize(firstSize);
+          }
+
+          // SEO güncelle
+          if (data) {
+            const categoryLabel = categoryMeta[data.gender]?.label || '';
+            const subCategoryLabel = categoryMeta[data.gender]?.subcategories?.find(sub => sub.slug === data.category)?.label || '';
+
+            updateSEO({
+              title: data.title,
+              description: data.description || `${data.title} - ${categoryLabel} ${subCategoryLabel} | Becca Giyim'de uygun fiyatlarla satın alın.`,
+              image: data.heroImage || data.image,
+              url: `/#/product/${data.id}`,
+              type: 'product',
+              breadcrumbs: [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: 'Ürünler', url: '/#/products' },
+                ...(data.gender ? [{ name: categoryMeta[data.gender]?.label || data.gender, url: `/#/${data.gender}` }] : []),
+                ...(data.category ? [{ name: subCategoryLabel || data.category, url: `/#/${data.gender}/${data.category}` }] : []),
+                { name: data.title, url: `/#/product/${data.id}` }
+              ]
+            });
+
+            setProductStructuredData({
+              id: data.id,
+              name: data.title,
+              description: data.description,
+              price: data.price,
+              images: [data.heroImage || data.image, ...(data.gallery || [])],
+              stock: Object.values(data.sizeStock || {}).reduce((a, b) => a + b, 0)
+            });
           }
         }
       } catch (err) {

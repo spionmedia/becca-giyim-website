@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
@@ -7,6 +7,7 @@ import ProductCard from '../components/product/ProductCard';
 import Button from '../components/common/Button';
 import categoryMeta from '../constants/categoryMeta';
 import useProducts from '../hooks/useProducts';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 // Animation variants
 const fadeInUp = {
@@ -300,6 +301,16 @@ const Home = () => {
   const { products: allProducts, loading } = useProducts();
   const featuredProducts = allProducts.slice(0, 4);
 
+  // SEO
+  useEffect(() => {
+    updateSEO({
+      title: null,
+      description: PAGE_SEO.home.description,
+      url: '/',
+      breadcrumbs: [{ name: 'Ana Sayfa', url: '/' }]
+    });
+  }, []);
+
   const categories = [
     {
       id: 'kadin',
@@ -416,10 +427,9 @@ const Home = () => {
 
       {/* Featured Products Section */}
       <motion.section
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={fadeInUp}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <SectionHeader>
           <SectionTitle>Öne Çıkan Ürünler</SectionTitle>
@@ -427,18 +437,17 @@ const Home = () => {
             Tümünü Gör <FiArrowRight />
           </ViewAllLink>
         </SectionHeader>
-        <ProductGrid
-          as={motion.div}
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
+        <ProductGrid>
           {loading ? (
             <p>Yükleniyor...</p>
           ) : featuredProducts.length > 0 ? (
             featuredProducts.map((product, index) => (
-              <motion.div key={product.id} variants={scaleIn}>
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
                 <ProductCard product={product} />
               </motion.div>
             ))

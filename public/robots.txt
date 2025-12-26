@@ -1,3 +1,31 @@
-# https://www.robotstxt.org/robotstxt.html
+# Becca Giyim - robots.txt
+# https://beccagiyim.com
+
 User-agent: *
-Disallow:
+Allow: /
+
+# Önemli sayfalar
+Allow: /
+Allow: /#/products
+Allow: /#/kadin
+Allow: /#/erkek
+Allow: /#/gizlilik-politikasi
+Allow: /#/teslimat-ve-iade
+Allow: /#/mesafeli-satis-sozlesmesi
+
+# Admin ve özel sayfaları engelle
+Disallow: /#/admin/
+Disallow: /#/checkout
+Disallow: /#/payment-callback
+Disallow: /#/account
+Disallow: /#/orders
+Disallow: /#/order/
+Disallow: /#/login
+Disallow: /#/register
+Disallow: /#/reset-password
+
+# Crawl delay (sunucu yükünü azaltmak için)
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://beccagiyim.com/sitemap.xml

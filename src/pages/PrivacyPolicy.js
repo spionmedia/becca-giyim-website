@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 const PageWrapper = styled.section`
   display: flex;
@@ -46,6 +47,18 @@ const List = styled.ul`
 `;
 
 const PrivacyPolicy = () => {
+  useEffect(() => {
+    updateSEO({
+      title: PAGE_SEO.privacy.title,
+      description: PAGE_SEO.privacy.description,
+      url: '/#/gizlilik-politikasi',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Gizlilik Politikası', url: '/#/gizlilik-politikasi' }
+      ]
+    });
+  }, []);
+
   const sections = [
     {
       title: '1. Genel Bilgilendirme',

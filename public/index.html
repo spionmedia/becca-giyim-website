@@ -1,43 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Becca Giyim E-Ticaret Sitesi"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<html lang="tr">
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Becca Giyim</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+<head>
+  <meta charset="utf-8" />
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <!-- Favicon ve Touch Icons -->
+  <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/android-chrome-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/android-chrome-512x512.png" />
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <!-- Temel Meta Taglar -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="msapplication-TileColor" content="#000000" />
+  <meta name="msapplication-TileImage" content="%PUBLIC_URL%/logo512.png" />
+
+  <!-- SEO Meta Taglar -->
+  <title>Becca Giyim | Kadın ve Erkek Giyim Online Alışveriş</title>
+  <meta name="description"
+    content="Becca Giyim'de en şık kadın ve erkek giyim ürünlerini keşfedin. Tişört, sweatshirt, pantolon ve daha fazlası uygun fiyatlarla. Hızlı kargo, güvenli ödeme." />
+  <meta name="keywords"
+    content="becca giyim, kadın giyim, erkek giyim, online alışveriş, tişört, sweatshirt, pantolon, elbise, moda, giyim mağazası, türkiye" />
+  <meta name="author" content="Becca Giyim" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="bingbot" content="index, follow" />
+  <link rel="canonical" href="https://beccagiyim.com" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://beccagiyim.com" />
+  <meta property="og:title" content="Becca Giyim | Kadın ve Erkek Giyim Online Alışveriş" />
+  <meta property="og:description"
+    content="Becca Giyim'de en şık kadın ve erkek giyim ürünlerini keşfedin. Tişört, sweatshirt, pantolon ve daha fazlası uygun fiyatlarla." />
+  <meta property="og:image" content="%PUBLIC_URL%/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Becca Giyim Logo" />
+  <meta property="og:site_name" content="Becca Giyim" />
+  <meta property="og:locale" content="tr_TR" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://beccagiyim.com" />
+  <meta name="twitter:title" content="Becca Giyim | Kadın ve Erkek Giyim Online Alışveriş" />
+  <meta name="twitter:description"
+    content="Becca Giyim'de en şık kadın ve erkek giyim ürünlerini keşfedin. Tişört, sweatshirt, pantolon ve daha fazlası uygun fiyatlarla." />
+  <meta name="twitter:image" content="%PUBLIC_URL%/og-image.jpg" />
+  <meta name="twitter:image:alt" content="Becca Giyim Logo" />
+
+  <!-- Ek SEO Meta Taglar -->
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Becca Giyim" />
+
+  <!-- Geo Tags (Türkiye) -->
+  <meta name="geo.region" content="TR" />
+  <meta name="geo.placename" content="Türkiye" />
+  <meta name="language" content="Turkish" />
+  <meta name="content-language" content="tr" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <!-- Preconnect for Performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+  <!-- Structured Data - Organization -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Becca Giyim",
+      "url": "https://beccagiyim.com",
+      "logo": "https://beccagiyim.com/logo.jpg",
+      "description": "Becca Giyim - Kadın ve Erkek Giyim Online Alışveriş Mağazası",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "TR"
+      },
+      "sameAs": []
+    }
+    </script>
+
+  <!-- Structured Data - WebSite (Search Box) -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Becca Giyim",
+      "url": "https://beccagiyim.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://beccagiyim.com/#/products?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+  <!-- Structured Data - E-commerce Store -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Becca Giyim",
+      "url": "https://beccagiyim.com",
+      "logo": "https://beccagiyim.com/logo.jpg",
+      "image": "https://beccagiyim.com/og-image.jpg",
+      "description": "Kadın ve erkek giyim ürünleri online alışveriş mağazası",
+      "priceRange": "₺₺",
+      "currenciesAccepted": "TRY",
+      "paymentAccepted": "Kredi Kartı, Banka Kartı",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "TR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "39.9334",
+        "longitude": "32.8597"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "00:00",
+        "closes": "23:59"
+      }
+    }
+    </script>
+
+  <!-- Structured Data - BreadcrumbList -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Ana Sayfa",
+          "item": "https://beccagiyim.com"
+        }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+  <noscript>
+    <div style="padding: 20px; text-align: center;">
+      <h1>Becca Giyim</h1>
+      <p>Bu siteyi görüntülemek için JavaScript'i etkinleştirmeniz gerekmektedir.</p>
+      <p>Kadın ve erkek giyim ürünlerinde en iyi fiyatlar için Becca Giyim'i ziyaret edin.</p>
+    </div>
+  </noscript>
+  <div id="root"></div>
+</body>
+
 </html>

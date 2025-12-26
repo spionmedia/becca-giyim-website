@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaBars, FaTimes, FaUser, FaSignOutAlt, FaBoxOpen, FaUserCog } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaUser, FaSignOutAlt, FaBoxOpen, FaUserCog, FaChevronDown } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import categoryMeta from '../../constants/categoryMeta';
 
 const HeaderContainer = styled(motion.header)`
   background-color: #fff;
@@ -32,20 +33,31 @@ const Nav = styled.nav`
 `;
 
 const Logo = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 24px;
   font-weight: bold;
   color: ${props => props.theme.colors.primary};
   text-decoration: none;
   font-family: 'Playfair Display', serif;
+  
+  img {
+    height: 40px;
+    width: auto;
+    border-radius: 4px;
+  }
 `;
 
 const Menu = styled.ul`
   display: flex;
   gap: 30px;
   list-style: none;
+  margin: 0;
+  padding: 0;
   
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
-    display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
+    display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
     flex-direction: column;
     position: absolute;
     top: 100%;
@@ -54,19 +66,151 @@ const Menu = styled.ul`
     background-color: #fff;
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    gap: 20px;
+    gap: 0;
+    z-index: 1000;
   }
 `;
 
 const MenuItem = styled.li`
-  a {
+  position: relative;
+  
+  > a {
     text-decoration: none;
-    color: ${props => props.theme.colors.text};
+    color: ${props => props.theme.colors.text.primary};
     font-weight: 500;
     transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
 
     &:hover {
       color: ${props => props.theme.colors.primary};
+    }
+  }
+`;
+
+const CategoryMenuItem = styled.li`
+  position: relative;
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    border-bottom: 1px solid #eee;
+    
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+`;
+
+const CategoryButton = styled.button`
+  background: none;
+  border: none;
+  text-decoration: none;
+  color: ${props => props.theme.colors.text.primary};
+  font-weight: 500;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+
+  &:hover {
+    color: ${props => props.theme.colors.primary};
+  }
+  
+  svg {
+    font-size: 10px;
+    transition: transform 0.3s ease;
+    transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0)'};
+  }
+`;
+
+const CategoryDropdown = styled(motion.div)`
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  border-radius: 12px;
+  padding: 8px 0;
+  z-index: 1001;
+  margin-top: 8px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #fff;
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 0;
+    padding: 0;
+    background: #f9f9f9;
+    
+    &::before {
+      display: none;
+    }
+  }
+`;
+
+const CategoryDropdownHeader = styled(Link)`
+  display: block;
+  padding: 12px 20px;
+  color: ${props => props.theme.colors.primary};
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 4px;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: 12px 16px;
+  }
+`;
+
+const CategoryDropdownItem = styled(Link)`
+  display: block;
+  padding: 10px 20px;
+  color: ${props => props.theme.colors.text.primary};
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.primary}10;
+    color: ${props => props.theme.colors.primary};
+    padding-left: 24px;
+  }
+  
+  span {
+    display: block;
+    font-size: 12px;
+    color: ${props => props.theme.colors.text.secondary};
+    margin-top: 2px;
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    padding: 10px 16px 10px 24px;
+    
+    &:hover {
+      padding-left: 28px;
     }
   }
 `;
@@ -78,7 +222,7 @@ const Icons = styled.div`
 `;
 
 const IconLink = styled(Link)`
-  color: ${props => props.theme.colors.text};
+  color: ${props => props.theme.colors.text.primary};
   font-size: 20px;
   position: relative;
   transition: color 0.3s;
@@ -109,7 +253,7 @@ const MobileMenuButton = styled.button`
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: ${props => props.theme.colors.text};
+  color: ${props => props.theme.colors.text.primary};
 
   @media (max-width: ${props => props.theme.breakpoints.mobile}) {
     display: block;
@@ -152,7 +296,7 @@ const DropdownItem = styled(Link)`
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  color: ${props => props.theme.colors.text};
+  color: ${props => props.theme.colors.text.primary};
   text-decoration: none;
   transition: background-color 0.2s;
 
@@ -181,8 +325,22 @@ const LogoutButton = styled.button`
   }
 `;
 
+const dropdownVariants = {
+  hidden: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2 }
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.2 }
+  }
+};
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openCategory, setOpenCategory] = useState(null);
   const { items: cart } = useCart();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -194,6 +352,14 @@ const Header = () => {
     } catch (error) {
       console.error('Çıkış yapılamadı:', error);
     }
+  };
+
+  const toggleCategory = (category) => {
+    setOpenCategory(openCategory === category ? null : category);
+  };
+
+  const closeDropdowns = () => {
+    setOpenCategory(null);
   };
 
   return (
@@ -214,13 +380,102 @@ const Header = () => {
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.2 }}
         >
-          <Logo to="/">BECCA</Logo>
+          <Logo to="/" aria-label="Becca Giyim Ana Sayfa">
+            <img src="/logo.jpg" alt="Becca Giyim Logo" />
+            BECCA
+          </Logo>
         </motion.div>
 
-        <Menu isOpen={isMenuOpen}>
-          <MenuItem><Link to="/kadin">KADIN</Link></MenuItem>
-          <MenuItem><Link to="/erkek">ERKEK</Link></MenuItem>
-          <MenuItem><Link to="/products">TÜM ÜRÜNLER</Link></MenuItem>
+        <Menu $isOpen={isMenuOpen}>
+          <MenuItem>
+            <Link to="/" onClick={() => setIsMenuOpen(false)}>ANA SAYFA</Link>
+          </MenuItem>
+
+          {/* Kadın Kategorisi */}
+          <CategoryMenuItem
+            onMouseEnter={() => window.innerWidth > 768 && setOpenCategory('kadin')}
+            onMouseLeave={() => window.innerWidth > 768 && setOpenCategory(null)}
+          >
+            <CategoryButton
+              $isOpen={openCategory === 'kadin'}
+              onClick={() => toggleCategory('kadin')}
+            >
+              KADIN <FaChevronDown />
+            </CategoryButton>
+
+            <AnimatePresence>
+              {openCategory === 'kadin' && (
+                <CategoryDropdown
+                  variants={dropdownVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                >
+                  <CategoryDropdownHeader
+                    to="/kadin"
+                    onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
+                  >
+                    Tüm Kadın Ürünleri
+                  </CategoryDropdownHeader>
+                  {categoryMeta.kadin.subcategories.map((sub) => (
+                    <CategoryDropdownItem
+                      key={sub.slug}
+                      to={`/kadin/${sub.slug}`}
+                      onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
+                    >
+                      {sub.label}
+                      <span>{sub.description}</span>
+                    </CategoryDropdownItem>
+                  ))}
+                </CategoryDropdown>
+              )}
+            </AnimatePresence>
+          </CategoryMenuItem>
+
+          {/* Erkek Kategorisi */}
+          <CategoryMenuItem
+            onMouseEnter={() => window.innerWidth > 768 && setOpenCategory('erkek')}
+            onMouseLeave={() => window.innerWidth > 768 && setOpenCategory(null)}
+          >
+            <CategoryButton
+              $isOpen={openCategory === 'erkek'}
+              onClick={() => toggleCategory('erkek')}
+            >
+              ERKEK <FaChevronDown />
+            </CategoryButton>
+
+            <AnimatePresence>
+              {openCategory === 'erkek' && (
+                <CategoryDropdown
+                  variants={dropdownVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                >
+                  <CategoryDropdownHeader
+                    to="/erkek"
+                    onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
+                  >
+                    Tüm Erkek Ürünleri
+                  </CategoryDropdownHeader>
+                  {categoryMeta.erkek.subcategories.map((sub) => (
+                    <CategoryDropdownItem
+                      key={sub.slug}
+                      to={`/erkek/${sub.slug}`}
+                      onClick={() => { closeDropdowns(); setIsMenuOpen(false); }}
+                    >
+                      {sub.label}
+                      <span>{sub.description}</span>
+                    </CategoryDropdownItem>
+                  ))}
+                </CategoryDropdown>
+              )}
+            </AnimatePresence>
+          </CategoryMenuItem>
+
+          <MenuItem>
+            <Link to="/products" onClick={() => setIsMenuOpen(false)}>TÜM ÜRÜNLER</Link>
+          </MenuItem>
         </Menu>
 
         <Icons>

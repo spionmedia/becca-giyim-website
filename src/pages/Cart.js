@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/common/Button';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { updateSEO, PAGE_SEO } from '../utils/seo';
 
 const Page = styled.section`
   display: grid;
@@ -150,6 +152,18 @@ const Cart = () => {
   const { items, summary, updateQuantity, removeItem, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    updateSEO({
+      title: PAGE_SEO.cart.title,
+      description: PAGE_SEO.cart.description,
+      url: '/#/cart',
+      breadcrumbs: [
+        { name: 'Ana Sayfa', url: '/' },
+        { name: 'Sepetim', url: '/#/cart' }
+      ]
+    });
+  }, []);
 
   const handleDecrease = (item) => {
     if (item.quantity > 1) {
